@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Mage Idle - P0</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#172018;
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+#game{
+  max-width:700px;
+  margin:auto;
+  padding:12px;
+}
+h2{margin:4px 0 10px}
+.top{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:8px;
+}
+.card{
+  background:#253126;
+  border:1px solid #455846;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+}
+#field{
+  position:relative;
+  height:420px;
+  overflow:hidden;
+  border:2px solid #536c50;
+  border-radius:12px;
+  background:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px),
+    #668a52;
+  background-size:24px 24px;
+}
+.unit{
+  position:absolute;
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+}
+.slime{font-size:25px}
+.hp{
+  position:absolute;
+  left:2px;
+  right:2px;
+  bottom:-4px;
+  height:5px;
+  background:#333;
+}
+.hp span{
+  display:block;
+  height:100%;
+  background:#9ee36a;
+}
+#debug{
+  margin-top:10px;
+  background:#080b09;
+  border:1px solid #506050;
+  border-radius:10px;
+  padding:10px;
+  font-family:monospace;
+  font-size:12px;
+  line-height:1.55;
+  white-space:pre-line;
+}
+#event{
+  background:#253126;
+  margin-top:8px;
+  padding:9px;
+  border-radius:9px;
+}
+button{
+  width:100%;
+  margin-top:8px;
+  padding:12px;
+  font-size:16px;
+  border:0;
+  border-radius:10px;
+}
+.pop{
+  position:absolute;
+  font-size:12px;
+  font-weight:bold;
+  background:#111c;
+  padding:3px 6px;
+  border-radius:6px;
+  z-index:20;
+  animation:rise .8s forwards;
+}
+@keyframes rise{
+  to{transform:translateY(-25px);opacity:0}
+}
+</style>
+</head>
+
+<body>
+<div id="game">
+
+<h2>⚔️ Mage Idle — P0</h2>
+
+<div class="top">
+  <div class="card">LV<br><b>1</b></div>
+  <div class="card">EXP<br><b id="exp">0</b></div>
+  <div class="card">擊殺<br><b id="kills">0</b></div>
+</div>
+
+<div id="field">
+  <div id="mage" class="unit">
+    🧙
+    <div class="hp"><span id="mageHP"></span></div>
+  </div>
+</div>
+
+<div id="event">P0 啟動中...</div>
+
+<button id="pause">⏸ 暫停</button>
+
+<div id="debug">DEBUG 初始化...</div>
+
+</div>
+
+<script>
+"use strict";
+
+const field = document.getElementById("field");
+const mageEl = document.getElementById("mage");
+const debugEl = document.getElementById("debug");
+const eventEl = document.getElementById("event");
+
+let running = true;
+let exp = 0;
+let kills = 0;
+
+let mage = {
+  x: 160,
+  y: 320,
+  hp: 100,
+  maxHp: 100,
+  speed: 70
+};
+
+let enemies = [];
+let target = null;
+
+let skillIndex = 0;
+let lastCast = 0;
+let lastEnemyAttack = 0;
+
+let aiState = "BOOT";
+
+const skills = [
+  {
+    name:"Fire",
+    icon:"🔥",
+    range:145,
+    damage:10,
+    cooldown:1000
+  },
+  {
+    name:"Lightning",
+    icon:"⚡",
+    range:145,
+    damage:10,
+    cooldown:1000
+  },
+  {
+    name:"Ice",
+    icon:"❄️",
+    range:48,
+    damage:7,
+    cooldown:650
+  }
+];
+
+function random(min,max){
+  return min + Math.random()*(max-min);
+}
+
+function distance(a,b){
+  return Math.hypot(a.x-b.x,a.y-b.y);
+}
+
+function createSlime(id){
+
+  const el=document.createElement("div");
+  el.className="unit slime";
+  el.innerHTML=
+    '🟢<div class="hp"><span></span></div>';
+
+  field.appendChild(el);
+
+  const slime={
+    id:id,
+    x:random(15,field.clientWidth-55),
+    y:random(30,300),
+    hp:50,
+    maxHp:50,
+    dead:false,
+    el:el
+  };
+
+  enemies.push(slime);
+
+  drawSlime(slime);
+}
+
+function drawSlime(s){
+
+  s.el.style.left=s.x+"px";
+  s.el.style.top=s.y+"px";
+
+  const hp=s.el.querySelector("span");
+
+  hp.style.width=
+    Math.max(0,(s.hp/s.maxHp)*100)+"%";
+}
+
+function popup(s,text){
+
+  const p=document.createElement("div");
+
+  p.className="pop";
+  p.textContent=text;
+
+  p.style.left=s.x+"px";
+  p.style.top=s.y+"px";
+
+  field.appendChild(p);
+
+  setTimeout(()=>{
+    p.remove();
+  },800);
+}
+
+function kill(s){
+
+  if(s.dead) return;
+
+  s.dead=true;
+
+  kills++;
+  exp+=10;
+
+  document.getElementById("kills").textContent=kills;
+  document.getElementById("exp").textContent=exp;
+
+  s.el.style.opacity="0.2";
+
+  eventEl.textContent=
+    "擊倒 Slime #"+s.id+"，獲得 10 EXP";
+
+  if(target===s){
+    target=null;
+  }
+
+  setTimeout(()=>{
+
+    s.hp=50;
+    s.dead=false;
+
+    s.x=random(15,field.clientWidth-55);
+    s.y=random(30,300);
+
+    s.el.style.opacity="1";
+
+    drawSlime(s);
+
+  },5000);
+}
+
+function damage(s,value){
+
+  if(s.dead) return;
+
+  s.hp-=value;
+
+  popup(s,"-"+value);
+
+  if(s.hp<=0){
+
+    s.hp=0;
+    drawSlime(s);
+    kill(s);
+
+  }else{
+
+    drawSlime(s);
+
+  }
+}
+
+function findTarget(){
+
+  const alive=enemies.filter(e=>!e.dead);
+
+  if(alive.length===0){
+    return null;
+  }
+
+  alive.sort(
+    (a,b)=>distance(mage,a)-distance(mage,b)
+  );
+
+  return alive[0];
+}
+
+function moveToward(obj,target,speed,dt){
+
+  const dx=target.x-obj.x;
+  const dy=target.y-obj.y;
+
+  const len=Math.hypot(dx,dy);
+
+  if(len===0) return;
+
+  obj.x += (dx/len)*speed*dt;
+  obj.y += (dy/len)*speed*dt;
+}
+
+function castSpell(s,now){
+
+  const skill=skills[skillIndex];
+
+  damage(s,skill.damage);
+
+  popup(s,skill.icon+" "+skill.name);
+
+  eventEl.textContent=
+    "施放 "+skill.icon+" "+skill.name+
+    " → Slime #"+s.id;
+
+  lastCast=now;
+
+  skillIndex++;
+
+  if(skillIndex>=skills.length){
+    skillIndex=0;
+  }
+}
+
+function enemyAttack(now){
+
+  if(!target || target.dead) return;
+
+  if(distance(mage,target)>52) return;
+
+  if(now-lastEnemyAttack<1000) return;
+
+  lastEnemyAttack=now;
+
+  mage.hp-=5;
+
+  if(mage.hp<=0){
+
+    mage.hp=100;
+
+    mage.x=field.clientWidth/2;
+    mage.y=340;
+
+    target=null;
+
+    eventEl.textContent=
+      "💀 法師死亡 → 自動回城重新出發";
+  }
+}
+
+function update(now,dt){
+
+  if(!running) return;
+
+  if(!target || target.dead){
+
+    aiState="SEARCH";
+
+    target=findTarget();
+
+  }
+
+  if(!target){
+    aiState="WAIT";
+    return;
+  }
+
+  const skill=skills[skillIndex];
+
+  const d=distance(mage,target);
+
+  if(d>skill.range){
+
+    aiState="MOVE";
+
+    moveToward(
+      mage,
+      target,
+      mage.speed,
+      dt
+    );
+
+  }else{
+
+    aiState="CAST";
+
+    if(now-lastCast>=skill.cooldown){
+
+      castSpell(target,now);
+
+    }
+
+  }
+
+  enemyAttack(now);
+}
+
+function draw(){
+
+  mageEl.style.left=mage.x+"px";
+  mageEl.style.top=mage.y+"px";
+
+  document.getElementById("mageHP").style.width=
+    mage.hp+"%";
+}
+
+function debug(){
+
+  let targetText="NONE";
+  let distText="-";
+
+  if(target && !target.dead){
+
+    targetText="Slime #"+target.id;
+    distText=Math.round(distance(mage,target));
+
+  }
+
+  const skill=skills[skillIndex];
+
+  debugEl.textContent=
+`P0 DEBUG
+Combat Loop: ${running ? "RUNNING":"PAUSED"}
+AI: ${aiState}
+
+Target: ${targetText}
+Distance: ${distText}px
+
+Mage HP: ${mage.hp}/100
+Position: ${Math.round(mage.x)}, ${Math.round(mage.y)}
+
+Current Skill:
+${skill.icon} ${skill.name}
+
+Enemies Alive:
+${enemies.filter(e=>!e.dead).length}/8
+
+Kills: ${kills}
+EXP: ${exp}`;
+}
+
+let previous=performance.now();
+
+function gameLoop(now){
+
+  const dt=
+    Math.min((now-previous)/1000,0.05);
+
+  previous=now;
+
+  update(now,dt);
+  draw();
+  debug();
+
+  requestAnimationFrame(gameLoop);
+}
+
+document
+.getElementById("pause")
+.addEventListener("click",function(){
+
+  running=!running;
+
+  this.textContent=
+    running
+    ? "⏸ 暫停"
+    : "▶ 繼續";
+
+});
+
+window.onerror=function(message){
+
+  debugEl.textContent=
+    "❌ JAVASCRIPT ERROR\n"+message;
+
+};
+
+for(let i=1;i<=8;i++){
+  createSlime(i);
+}
+
+mage.x=field.clientWidth/2;
+mage.y=340;
+
+eventEl.textContent=
+  "✅ P0 Combat Loop 已啟動";
+
+requestAnimationFrame(gameLoop);
+
+</script>
+</body>
+</html>
