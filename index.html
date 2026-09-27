@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 
-<title>Mage Idle - P0.2B-1</title>
+<title>Mage Idle - P0.2B-2</title>
 
 <style>
 *{
@@ -63,60 +63,35 @@ button{
   border-radius:12px;
 
   background:
-    radial-gradient(circle at 20% 30%,rgba(255,255,255,.06) 0 2px,transparent 3px),
-    radial-gradient(circle at 70% 70%,rgba(0,0,0,.08) 0 3px,transparent 4px),
-    linear-gradient(#638f52,#527c45);
+  radial-gradient(circle at 20% 30%,rgba(255,255,255,.06) 0 2px,transparent 3px),
+  radial-gradient(circle at 70% 70%,rgba(0,0,0,.08) 0 3px,transparent 4px),
+  linear-gradient(#638f52,#527c45);
 
   box-shadow:inset 0 0 35px rgba(0,0,0,.22);
 }
 
-/* =====================================================
+/* =========================
    MAGE
-   ===================================================== */
+   ========================= */
 
 #mage{
   position:absolute;
-
   width:82px;
   height:96px;
-
   transform:translate(-50%,-50%);
-
   z-index:20;
-
   pointer-events:none;
 }
 
-/*
-  角色視窗。
-
-  這個框只負責顯示一個角色，
-  超出去的 Sprite Sheet 全部隱藏。
-*/
-
 #mageViewport{
   position:absolute;
-
-  left:0;
-  top:0;
-
   width:82px;
   height:82px;
-
+  left:0;
+  top:0;
   overflow:hidden;
-
-  filter:
-    drop-shadow(
-      0 3px 2px
-      rgba(0,0,0,.35)
-    );
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.35));
 }
-
-/*
-  Sprite Sheet 原圖直接放進來。
-
-  不再用 background-position。
-*/
 
 #mageSheet{
   position:absolute;
@@ -129,42 +104,30 @@ button{
   pointer-events:none;
 
   /*
-    P0.2B-1：
-    先鎖定第一排 Idle 第一格。
+  JS 現在會控制 left / top
   */
 
   left:-59px;
   top:-22px;
 }
 
-
-/* =====================================================
+/* =========================
    HP
-   ===================================================== */
+   ========================= */
 
 .hp{
   position:absolute;
-
   height:6px;
-
   background:#321;
-
-  border:
-    1px solid
-    rgba(0,0,0,.65);
-
+  border:1px solid rgba(0,0,0,.65);
   border-radius:4px;
-
   overflow:hidden;
 }
 
 .hp span{
   display:block;
-
   height:100%;
-
   width:100%;
-
   background:#e55353;
 }
 
@@ -174,35 +137,23 @@ button{
   bottom:2px;
 }
 
-
-/* =====================================================
+/* =========================
    SLIME
-   ===================================================== */
+   ========================= */
 
 .slime{
   position:absolute;
-
   width:44px;
   height:48px;
-
-  transform:
-    translate(-50%,-50%);
-
+  transform:translate(-50%,-50%);
   text-align:center;
-
   z-index:10;
 }
 
 .slimeIcon{
   font-size:31px;
-
   line-height:34px;
-
-  filter:
-    drop-shadow(
-      0 2px 2px
-      rgba(0,0,0,.35)
-    );
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
 }
 
 .slime .hp{
@@ -211,168 +162,108 @@ button{
   bottom:0;
 }
 
-
-/* =====================================================
+/* =========================
    TARGET
-   ===================================================== */
+   ========================= */
 
 .targetRing{
   position:absolute;
-
   width:50px;
   height:24px;
-
-  border:
-    2px solid
-    rgba(255,230,90,.8);
-
+  border:2px solid rgba(255,230,90,.8);
   border-radius:50%;
-
-  transform:
-    translate(-50%,-50%);
-
+  transform:translate(-50%,-50%);
   z-index:5;
 }
 
-
-/* =====================================================
-   SPELL
-   ===================================================== */
+/* =========================
+   MAGIC
+   ========================= */
 
 .spell{
   position:absolute;
-
-  transform:
-    translate(-50%,-50%);
-
+  transform:translate(-50%,-50%);
   z-index:30;
-
   font-size:26px;
-
-  animation:
-    spellPop .42s
-    ease-out forwards;
+  pointer-events:none;
+  animation:spellPop .42s ease-out forwards;
 }
 
 @keyframes spellPop{
-
   0%{
-    transform:
-      translate(-50%,-50%)
-      scale(.5);
-
+    transform:translate(-50%,-50%) scale(.5);
     opacity:0;
   }
 
   35%{
-    transform:
-      translate(-50%,-70%)
-      scale(1.3);
-
+    transform:translate(-50%,-70%) scale(1.3);
     opacity:1;
   }
 
   100%{
-    transform:
-      translate(-50%,-110%)
-      scale(.8);
-
+    transform:translate(-50%,-110%) scale(.8);
     opacity:0;
   }
-
 }
-
-
-/* =====================================================
-   DAMAGE
-   ===================================================== */
 
 .damage{
   position:absolute;
-
-  transform:
-    translate(-50%,-50%);
-
+  transform:translate(-50%,-50%);
   z-index:40;
-
   font-size:13px;
-
   font-weight:800;
-
   color:white;
-
-  text-shadow:
-    0 1px 3px #000;
-
-  animation:
-    damageFloat .7s
-    forwards;
+  text-shadow:0 1px 3px #000;
+  pointer-events:none;
+  animation:damageFloat .7s forwards;
 }
 
 @keyframes damageFloat{
-
   from{
     opacity:1;
   }
 
   to{
     opacity:0;
-
-    transform:
-      translate(-50%,-100%);
+    transform:translate(-50%,-100%);
   }
-
 }
 
-
-/* =====================================================
+/* =========================
    PANEL
-   ===================================================== */
+   ========================= */
 
 #panel{
   margin-top:10px;
-
   background:#181e29;
-
   border-radius:10px;
-
   padding:10px;
 }
 
 #skillDisplay{
   font-size:14px;
-
   margin-bottom:7px;
 }
 
 #log{
   height:105px;
-
   overflow:auto;
-
   font-size:12px;
-
   line-height:1.5;
-
   color:#bfc8d8;
 }
 
 .debug{
   color:#8ee29a;
-
   font-weight:700;
 }
 
 .note{
   margin-top:8px;
-
   color:#8f9aad;
-
   font-size:11px;
-
   line-height:1.4;
 }
-
 </style>
 </head>
 
@@ -380,36 +271,26 @@ button{
 
 <div id="app">
 
-<h2>⚔️ Mage Idle — P0.2B-1</h2>
+<h2>⚔️ Mage Idle — P0.2B-2</h2>
 
 <div id="topbar">
 
 <div id="stats">
 
 Lv.<span id="level">1</span>
-
-｜ EXP
-<span id="exp">0</span>/<span id="expNeed">100</span>
-
-｜ 擊殺
-<span id="kills">0</span>
+｜ EXP <span id="exp">0</span>/<span id="expNeed">100</span>
+｜ 擊殺 <span id="kills">0</span>
 
 <br>
 
-HP
-<span id="hpText">100</span>/100
-
-｜ 狀態
-<span id="stateText">尋找目標</span>
+HP <span id="hpText">100</span>/100
+｜ 狀態 <span id="stateText">尋找目標</span>
 
 </div>
 
-<button id="pauseBtn">
-暫停
-</button>
+<button id="pauseBtn">暫停</button>
 
 </div>
-
 
 <div id="game">
 
@@ -432,136 +313,259 @@ alt="Mage">
 
 </div>
 
-
 <div id="panel">
 
 <div id="skillDisplay">
-
 下一技能：
-
-<strong id="nextSkill">
-🔥 Fire
-</strong>
-
+<strong id="nextSkill">🔥 Fire</strong>
 </div>
 
 <div id="log">
 
 <div class="debug">
-P0.2B-1 DEBUG
+P0.2B-2 DEBUG
 </div>
 
 <div>
-角色裁切校正模式
+方向動畫＋施法動畫啟動
 </div>
 
 </div>
 
 <div class="note">
-
-P0.2B-1：
-先確認單一角色正常顯示。
-戰鬥系統維持運作。
-
+P0.2B-2：Idle / Down / Left / Right / Up / Cast
 </div>
 
 </div>
 
 </div>
-
 
 <script>
 
-/* =====================================================
+/* =========================
    DOM
-   ===================================================== */
+   ========================= */
 
-const game =
-document.getElementById("game");
+const game=document.getElementById("game");
 
-const mageEl =
-document.getElementById("mage");
+const mageEl=document.getElementById("mage");
+const mageSheet=document.getElementById("mageSheet");
 
-const mageSheet =
-document.getElementById("mageSheet");
+const hpText=document.getElementById("hpText");
+const mageHpBar=document.getElementById("mageHp");
 
-const hpText =
-document.getElementById("hpText");
+const expEl=document.getElementById("exp");
+const expNeedEl=document.getElementById("expNeed");
+const levelEl=document.getElementById("level");
+const killsEl=document.getElementById("kills");
 
-const mageHpBar =
-document.getElementById("mageHp");
+const stateText=document.getElementById("stateText");
+const nextSkillEl=document.getElementById("nextSkill");
 
-const expEl =
-document.getElementById("exp");
-
-const expNeedEl =
-document.getElementById("expNeed");
-
-const levelEl =
-document.getElementById("level");
-
-const killsEl =
-document.getElementById("kills");
-
-const stateText =
-document.getElementById("stateText");
-
-const nextSkillEl =
-document.getElementById("nextSkill");
-
-const pauseBtn =
-document.getElementById("pauseBtn");
-
-const logEl =
-document.getElementById("log");
+const pauseBtn=document.getElementById("pauseBtn");
+const logEl=document.getElementById("log");
 
 
-/* =====================================================
-   GAME
-   ===================================================== */
+/* =========================
+   STATE
+   ========================= */
 
 let paused=false;
-
-let lastTime=
-performance.now();
+let lastTime=performance.now();
 
 let kills=0;
-
 let exp=0;
-
 let expNeed=100;
-
 let level=1;
 
 
-/* =====================================================
+/* =========================
    MAGE
-   ===================================================== */
+   ========================= */
 
 const mage={
 
-x:0,
+  x:0,
+  y:0,
 
-y:0,
+  hp:100,
+  maxHp:100,
 
-hp:100,
+  speed:70,
 
-maxHp:100,
+  target:null,
 
-speed:70,
+  skillIndex:0,
+  lastAttack:0,
 
-target:null,
+  state:"idle",
+  direction:"down",
 
-skillIndex:0,
+  frame:0,
+  frameTimer:0,
 
-lastAttack:0
+  casting:false,
+  castStart:0,
+  castDuration:560
 
 };
 
 
-/* =====================================================
+/* =========================
+   SPRITE ATLAS
+   ========================= */
+
+/*
+P0.2B-1 已經證明：
+
+Idle 第一格大約：
+
+left = -59
+top  = -22
+
+現在利用實際圖片格子間距移動。
+
+縮放後：
+橫向一格約 83px
+縱向一排約 78px
+*/
+
+const SPRITE={
+
+  baseX:-59,
+
+  stepX:83,
+
+  rows:{
+
+    idle:-22,
+
+    down:-100,
+
+    left:-178,
+
+    right:-256,
+
+    up:-334,
+
+    cast:-412
+
+  }
+
+};
+
+
+/* =========================
+   ANIMATION
+   ========================= */
+
+function setSprite(row,frame){
+
+  const x=
+  SPRITE.baseX-
+  (
+    frame*
+    SPRITE.stepX
+  );
+
+  const y=
+  SPRITE.rows[row];
+
+  mageSheet.style.left=
+  x+"px";
+
+  mageSheet.style.top=
+  y+"px";
+
+}
+
+
+function updateAnimation(dt,now){
+
+  let animation="idle";
+
+  let speed=135;
+
+
+  /*
+  CAST 優先於所有動畫
+  */
+
+  if(mage.casting){
+
+    animation="cast";
+
+    speed=70;
+
+
+    if(
+      now-mage.castStart
+      >=
+      mage.castDuration
+    ){
+
+      mage.casting=false;
+
+      mage.frame=0;
+      mage.frameTimer=0;
+
+    }
+
+  }
+
+  else if(
+    mage.state==="walk"
+  ){
+
+    animation=
+    mage.direction;
+
+    speed=105;
+
+  }
+
+  else{
+
+    animation="idle";
+
+    speed=150;
+
+  }
+
+
+  mage.frameTimer+=dt;
+
+
+  if(
+    mage.frameTimer>=speed
+  ){
+
+    mage.frameTimer=0;
+
+    mage.frame++;
+
+    if(
+      mage.frame>=8
+    ){
+
+      mage.frame=0;
+
+    }
+
+  }
+
+
+  setSprite(
+    animation,
+    mage.frame
+  );
+
+}
+
+
+/* =========================
    SKILLS
-   ===================================================== */
+   ========================= */
 
 const skills=[
 
@@ -592,18 +596,17 @@ cooldown:650
 ];
 
 
-/* =====================================================
+/* =========================
    SLIMES
-   ===================================================== */
+   ========================= */
 
 const slimes=[];
-
 const SLIME_COUNT=8;
 
 
-/* =====================================================
+/* =========================
    HELPERS
-   ===================================================== */
+   ========================= */
 
 function clamp(v,min,max){
 
@@ -650,9 +653,9 @@ logEl.scrollHeight;
 }
 
 
-/* =====================================================
-   SLIME CREATE
-   ===================================================== */
+/* =========================
+   SLIME
+   ========================= */
 
 function createSlime(index){
 
@@ -681,11 +684,9 @@ const slime={
 id:index,
 
 x:0,
-
 y:0,
 
 hp:50,
-
 maxHp:50,
 
 attack:5,
@@ -693,15 +694,12 @@ attack:5,
 alive:true,
 
 respawnAt:0,
-
 lastAttack:0,
 
 el:el,
 
 hpEl:
-el.querySelector(
-".hp span"
-)
+el.querySelector(".hp span")
 
 };
 
@@ -716,20 +714,13 @@ true
 }
 
 
-/* =====================================================
-   RESPAWN
-   ===================================================== */
-
 function respawnSlime(
 slime,
 initial=false
 ){
 
-const w=
-game.clientWidth;
-
-const h=
-game.clientHeight;
+const w=game.clientWidth;
+const h=game.clientHeight;
 
 
 slime.x=
@@ -784,10 +775,6 @@ updateSlime(slime);
 }
 
 
-/* =====================================================
-   SLIME VISUAL
-   ===================================================== */
-
 function updateSlime(slime){
 
 slime.el.style.left=
@@ -806,9 +793,9 @@ slime.maxHp*
 }
 
 
-/* =====================================================
+/* =========================
    TARGET
-   ===================================================== */
+   ========================= */
 
 let targetRing=null;
 
@@ -834,9 +821,7 @@ targetRing
 function findTarget(){
 
 let best=null;
-
-let bestDistance=
-Infinity;
+let bestDistance=Infinity;
 
 
 for(
@@ -861,7 +846,6 @@ bestDistance
 ){
 
 bestDistance=d;
-
 best=slime;
 
 }
@@ -874,9 +858,39 @@ mage.target=best;
 }
 
 
-/* =====================================================
+/* =========================
+   DIRECTION
+   ========================= */
+
+function updateDirection(dx,dy){
+
+if(
+Math.abs(dx)>
+Math.abs(dy)
+){
+
+mage.direction=
+dx<0
+?"left"
+:"right";
+
+}
+
+else{
+
+mage.direction=
+dy<0
+?"up"
+:"down";
+
+}
+
+}
+
+
+/* =========================
    EFFECT
-   ===================================================== */
+   ========================= */
 
 function spellEffect(
 target,
@@ -886,8 +900,7 @@ skill
 const el=
 document.createElement("div");
 
-el.className=
-"spell";
+el.className="spell";
 
 el.textContent=
 skill.icon;
@@ -909,10 +922,6 @@ setTimeout(
 }
 
 
-/* =====================================================
-   DAMAGE TEXT
-   ===================================================== */
-
 function damageText(
 target,
 amount
@@ -921,8 +930,7 @@ amount
 const el=
 document.createElement("div");
 
-el.className=
-"damage";
+el.className="damage";
 
 el.textContent=
 "-"+amount;
@@ -944,9 +952,9 @@ setTimeout(
 }
 
 
-/* =====================================================
+/* =========================
    KILL
-   ===================================================== */
+   ========================= */
 
 function killSlime(slime){
 
@@ -961,7 +969,6 @@ performance.now()+
 
 
 kills++;
-
 exp+=10;
 
 
@@ -996,9 +1003,9 @@ mage.target=null;
 }
 
 
-/* =====================================================
+/* =========================
    ATTACK
-   ===================================================== */
+   ========================= */
 
 function attack(
 target,
@@ -1022,6 +1029,19 @@ return;
 
 mage.lastAttack=
 now;
+
+
+/*
+啟動 Cast 動畫
+*/
+
+mage.casting=true;
+
+mage.castStart=now;
+
+mage.frame=0;
+
+mage.frameTimer=0;
 
 
 spellEffect(
@@ -1062,6 +1082,7 @@ target
 );
 
 }
+
 else{
 
 updateSlime(
@@ -1086,9 +1107,9 @@ mage.skillIndex
 }
 
 
-/* =====================================================
+/* =========================
    ENEMY ATTACK
-   ===================================================== */
+   ========================= */
 
 function enemyAttack(now){
 
@@ -1121,9 +1142,7 @@ slime.lastAttack
 continue;
 
 
-slime.lastAttack=
-now;
-
+slime.lastAttack=now;
 
 mage.hp-=
 slime.attack;
@@ -1157,6 +1176,8 @@ game.clientHeight-80;
 
 mage.target=null;
 
+mage.state="idle";
+
 break;
 
 }
@@ -1166,9 +1187,9 @@ break;
 }
 
 
-/* =====================================================
-   MAGE AI
-   ===================================================== */
+/* =========================
+   AI
+   ========================= */
 
 function updateMage(
 dt,
@@ -1186,6 +1207,8 @@ findTarget();
 
 
 if(!mage.target){
+
+mage.state="idle";
 
 stateText.textContent=
 "等待怪物";
@@ -1216,6 +1239,12 @@ dy
 );
 
 
+updateDirection(
+dx,
+dy
+);
+
+
 const skill=
 skills[
 mage.skillIndex
@@ -1226,6 +1255,8 @@ if(
 d>
 skill.range
 ){
+
+mage.state="walk";
 
 stateText.textContent=
 "移動中";
@@ -1252,10 +1283,15 @@ d
 );
 
 }
+
 else{
 
+mage.state="idle";
+
 stateText.textContent=
-"戰鬥中";
+mage.casting
+?"施法中"
+:"戰鬥中";
 
 
 attack(
@@ -1284,9 +1320,9 @@ game.clientHeight-48
 }
 
 
-/* =====================================================
-   RESPAWN UPDATE
-   ===================================================== */
+/* =========================
+   RESPAWN
+   ========================= */
 
 function updateRespawns(now){
 
@@ -1316,9 +1352,9 @@ log(
 }
 
 
-/* =====================================================
+/* =========================
    VISUAL
-   ===================================================== */
+   ========================= */
 
 function updateVisual(){
 
@@ -1337,11 +1373,8 @@ mage.target.alive
 targetRing.style.display=
 "block";
 
-
 targetRing.style.left=
-mage.target.x+
-"px";
-
+mage.target.x+"px";
 
 targetRing.style.top=
 (
@@ -1349,6 +1382,7 @@ mage.target.y+14
 )+"px";
 
 }
+
 else{
 
 targetRing.style.display=
@@ -1359,9 +1393,9 @@ targetRing.style.display=
 }
 
 
-/* =====================================================
+/* =========================
    HUD
-   ===================================================== */
+   ========================= */
 
 function updateHUD(){
 
@@ -1392,9 +1426,9 @@ kills;
 }
 
 
-/* =====================================================
+/* =========================
    LOOP
-   ===================================================== */
+   ========================= */
 
 function loop(now){
 
@@ -1409,16 +1443,17 @@ lastTime=now;
 
 if(!paused){
 
-updateRespawns(
-now
-);
+updateRespawns(now);
 
 updateMage(
 dt,
 now
 );
 
-enemyAttack(
+enemyAttack(now);
+
+updateAnimation(
+dt,
 now
 );
 
@@ -1436,9 +1471,9 @@ loop
 }
 
 
-/* =====================================================
+/* =========================
    PAUSE
-   ===================================================== */
+   ========================= */
 
 pauseBtn.addEventListener(
 "click",
@@ -1464,9 +1499,9 @@ paused
 );
 
 
-/* =====================================================
+/* =========================
    START
-   ===================================================== */
+   ========================= */
 
 function start(){
 
@@ -1492,18 +1527,29 @@ createSlime(i);
 }
 
 
+setSprite(
+"idle",
+0
+);
+
+
 updateVisual();
 
 updateHUD();
 
 
 log(
-"✅ P0.2B-1 啟動"
+"✅ P0.2B-2 啟動"
 );
 
 
 log(
-"🎯 單角色裁切校正"
+"🏃 方向走路動畫 ON"
+);
+
+
+log(
+"✨ Cast 施法動畫 ON"
 );
 
 
