@@ -5,7 +5,7 @@
 <meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 
-<title>Mage Idle - P0.2C-2</title>
+<title>Mage Idle - P0.2C-3</title>
 
 <style>
 *{
@@ -59,7 +59,6 @@ button{
   width:100%;
   height:520px;
   overflow:hidden;
-
   border:2px solid #4c6646;
   border-radius:12px;
 
@@ -78,35 +77,26 @@ button{
 
 #mage{
   position:absolute;
-
   width:88px;
   height:96px;
 
   transform:translate(-50%,-50%);
 
   z-index:20;
-
   pointer-events:none;
 }
 
 
 /*
-P0.2C-2
-
-原始 Atlas：
-1408 × 960
-
-8 欄 × 6 排
+Atlas 原始：
+8 × 6
 
 每格：
 176 × 160
 
-遊戲顯示縮小 50%
+顯示縮小 50%：
 
-所以：
-
-每格顯示 = 88 × 80
-整張背景 = 704 × 480
+88 × 80
 */
 
 #mageSprite{
@@ -145,25 +135,21 @@ P0.2C-2
 
 .hp{
   position:absolute;
-
   height:6px;
-
   background:#321;
 
-  border:1px solid rgba(0,0,0,.65);
+  border:
+    1px solid
+    rgba(0,0,0,.65);
 
   border-radius:4px;
-
   overflow:hidden;
 }
 
 .hp span{
   display:block;
-
   height:100%;
-
   width:100%;
-
   background:#e55353;
 }
 
@@ -184,7 +170,8 @@ P0.2C-2
   width:44px;
   height:48px;
 
-  transform:translate(-50%,-50%);
+  transform:
+    translate(-50%,-50%);
 
   text-align:center;
 
@@ -225,7 +212,8 @@ P0.2C-2
 
   border-radius:50%;
 
-  transform:translate(-50%,-50%);
+  transform:
+    translate(-50%,-50%);
 
   z-index:5;
 }
@@ -238,7 +226,8 @@ P0.2C-2
 .spell{
   position:absolute;
 
-  transform:translate(-50%,-50%);
+  transform:
+    translate(-50%,-50%);
 
   z-index:30;
 
@@ -275,24 +264,24 @@ P0.2C-2
 
     opacity:0;
   }
-
 }
 
 
 .damage{
   position:absolute;
 
-  transform:translate(-50%,-50%);
+  transform:
+    translate(-50%,-50%);
 
   z-index:40;
 
   font-size:13px;
-
   font-weight:800;
 
   color:white;
 
-  text-shadow:0 1px 3px #000;
+  text-shadow:
+    0 1px 3px #000;
 
   pointer-events:none;
 
@@ -312,7 +301,6 @@ P0.2C-2
     transform:
       translate(-50%,-100%);
   }
-
 }
 
 
@@ -332,7 +320,6 @@ P0.2C-2
 
 #skillDisplay{
   font-size:14px;
-
   margin-bottom:7px;
 }
 
@@ -350,17 +337,13 @@ P0.2C-2
 
 .debug{
   color:#8ee29a;
-
   font-weight:700;
 }
 
 .note{
   margin-top:8px;
-
   color:#8f9aad;
-
   font-size:11px;
-
   line-height:1.4;
 }
 </style>
@@ -371,7 +354,7 @@ P0.2C-2
 <div id="app">
 
 <h2>
-⚔️ Mage Idle — P0.2C-2
+⚔️ Mage Idle — P0.2C-3
 </h2>
 
 
@@ -436,11 +419,11 @@ HP
 <div id="log">
 
 <div class="debug">
-P0.2C-2 FIXED ATLAS
+P0.2C-3 DIRECTIONAL CAST
 </div>
 
 <div>
-176×160 精準格動畫啟動
+Facing → Lock → Cast
 </div>
 
 </div>
@@ -448,8 +431,8 @@ P0.2C-2 FIXED ATLAS
 
 <div class="note">
 P0.2B-4 Facing Lock /
-Clean Atlas /
-Cast Animation
+Directional Casting /
+8-frame Down Cast
 </div>
 
 </div>
@@ -522,31 +505,12 @@ let level = 1;
 
 
 /* =========================
-   SPRITE ATLAS
+   SPRITE
    ========================= */
-
-/*
-原圖每格：
-176 × 160
-
-顯示 50%：
-88 × 80
-*/
 
 const FRAME_W = 88;
 const FRAME_H = 80;
 
-
-/*
-Atlas 排列：
-
-0 Idle
-1 Down
-2 Left
-3 Right
-4 Up
-5 Cast
-*/
 
 const ROW = {
 
@@ -589,6 +553,14 @@ const mage = {
 
   direction:"down",
 
+  /*
+  施法開始那一刻的方向。
+
+  Cast 過程中完全不允許改。
+  */
+
+  castDirection:"down",
+
   facingLocked:false,
 
   lockedTargetId:null,
@@ -625,7 +597,7 @@ function setSprite(
 
 
   mageSprite.style.backgroundPosition =
-  x + "px " + y + "px";
+    x + "px " + y + "px";
 
 }
 
@@ -676,10 +648,14 @@ function calculateDirection(
 
 
 /* =========================
-   FACING LOCK
+   FACING
    ========================= */
 
-function lockFacing(target){
+function faceTarget(target){
+
+  if(!target)
+    return;
+
 
   const dx =
   target.x - mage.x;
@@ -693,6 +669,25 @@ function lockFacing(target){
     dx,
     dy
   );
+
+}
+
+
+/* =========================
+   LOCK
+   ========================= */
+
+function lockFacing(target){
+
+  /*
+  非常重要：
+
+  鎖定之前，
+  強制重新看一次敵人的
+  即時位置。
+  */
+
+  faceTarget(target);
 
 
   mage.facingLocked =
@@ -717,7 +712,7 @@ function unlockFacing(){
 
 
 /* =========================
-   CAST
+   START CAST
    ========================= */
 
 function startCast(
@@ -730,21 +725,48 @@ function startCast(
     return;
 
 
-  mage.casting = true;
+  /*
+  施法前再做一次
+  最終 Facing 校正。
+  */
 
-  mage.castStart = now;
-
-  mage.frame = 0;
-
-  mage.frameTimer = 0;
+  faceTarget(target);
 
 
   /*
-  記住這次法術。
+  把這個方向拍照保存。
 
-  到 Cast 動畫中段
-  才真正命中。
+  後面整個 Cast 過程
+  都只能使用它。
   */
+
+  mage.castDirection =
+  mage.direction;
+
+
+  mage.facingLocked =
+  true;
+
+
+  mage.lockedTargetId =
+  target.id;
+
+
+  mage.casting =
+  true;
+
+
+  mage.castStart =
+  now;
+
+
+  mage.frame =
+  0;
+
+
+  mage.frameTimer =
+  0;
+
 
   mage.pendingHit = {
 
@@ -756,11 +778,15 @@ function startCast(
 
   };
 
+
+  stateText.textContent =
+  "施法中";
+
 }
 
 
 /* =========================
-   CAST HIT
+   HIT
    ========================= */
 
 function triggerCastHit(){
@@ -779,6 +805,7 @@ function triggerCastHit(){
 
   const target =
   mage.pendingHit.target;
+
 
   const skill =
   mage.pendingHit.skill;
@@ -821,9 +848,11 @@ function triggerCastHit(){
 
     target.hp = 0;
 
+
     updateSlime(
       target
     );
+
 
     killSlime(
       target
@@ -843,7 +872,206 @@ function triggerCastHit(){
 
 
 /* =========================
-   ANIMATION
+   CAST ANIMATION
+   ========================= */
+
+function updateCastAnimation(now){
+
+  const elapsed =
+  now -
+  mage.castStart;
+
+
+  const frameLength =
+  mage.castDuration / 8;
+
+
+  const castFrame =
+  Math.min(
+    7,
+    Math.floor(
+      elapsed /
+      frameLength
+    )
+  );
+
+
+  /*
+  ==================================
+  DOWN
+
+  我們真正擁有完整 Cast 的方向。
+
+  所以只有怪在下方時，
+  才播放 Cast 1～8。
+  ==================================
+  */
+
+  if(
+    mage.castDirection === "down"
+  ){
+
+    setSprite(
+      ROW.cast,
+      castFrame
+    );
+
+  }
+
+
+  /*
+  ==================================
+  LEFT
+
+  沒有 Left Cast 素材。
+
+  所以保持左向，
+  不允許突然轉正面。
+  ==================================
+  */
+
+  else if(
+    mage.castDirection === "left"
+  ){
+
+    /*
+    使用 Left 中央姿勢。
+
+    後半段稍微換一格，
+    產生施法動感。
+    */
+
+    const pose =
+    castFrame < 4
+    ? 2
+    : 4;
+
+
+    setSprite(
+      ROW.left,
+      pose
+    );
+
+  }
+
+
+  /*
+  ==================================
+  RIGHT
+  ==================================
+  */
+
+  else if(
+    mage.castDirection === "right"
+  ){
+
+    const pose =
+    castFrame < 4
+    ? 2
+    : 4;
+
+
+    setSprite(
+      ROW.right,
+      pose
+    );
+
+  }
+
+
+  /*
+  ==================================
+  UP
+  ==================================
+  */
+
+  else{
+
+    const pose =
+    castFrame < 4
+    ? 2
+    : 4;
+
+
+    setSprite(
+      ROW.up,
+      pose
+    );
+
+  }
+
+
+  /*
+  魔法在動畫中段命中。
+  */
+
+  if(
+    elapsed >= 320
+  ){
+
+    triggerCastHit();
+
+  }
+
+
+  /*
+  Cast 完成。
+  */
+
+  if(
+    elapsed >=
+    mage.castDuration
+  ){
+
+    mage.casting =
+    false;
+
+
+    mage.pendingHit =
+    null;
+
+
+    mage.frame =
+    0;
+
+
+    mage.frameTimer =
+    0;
+
+
+    /*
+    不解除 Facing Lock。
+
+    還是同一隻怪的話，
+    繼續面向它。
+    */
+
+    if(
+      mage.target &&
+      mage.target.alive
+    ){
+
+      faceTarget(
+        mage.target
+      );
+
+
+      mage.direction =
+      mage.castDirection;
+
+
+      stateText.textContent =
+      "鎖定攻擊";
+
+    }
+
+  }
+
+}
+
+
+/* =========================
+   NORMAL ANIMATION
    ========================= */
 
 function updateAnimation(
@@ -852,88 +1080,17 @@ function updateAnimation(
 ){
 
   /*
-  ========================
-  CAST
-  ========================
+  Cast 擁有最高優先權。
   */
 
   if(mage.casting){
 
-    const elapsed =
-    now -
-    mage.castStart;
-
-
-    /*
-    8 格 Cast
-
-    640 / 8 = 80ms
-    */
-
-    const frameLength =
-    mage.castDuration / 8;
-
-
-    const castFrame =
-    Math.min(
-      7,
-      Math.floor(
-        elapsed /
-        frameLength
-      )
-    );
-
-
-    setSprite(
-      ROW.cast,
-      castFrame
-    );
-
-
-    /*
-    Cast 第 5 格左右
-    魔法正式命中。
-    */
-
-    if(
-      elapsed >= 320
-    ){
-
-      triggerCastHit();
-
-    }
-
-
-    if(
-      elapsed >=
-      mage.castDuration
-    ){
-
-      mage.casting =
-      false;
-
-      mage.pendingHit =
-      null;
-
-      mage.frame =
-      0;
-
-      mage.frameTimer =
-      0;
-
-    }
-
+    updateCastAnimation(now);
 
     return;
 
   }
 
-
-  /*
-  ========================
-  NORMAL
-  ========================
-  */
 
   let row;
 
@@ -960,12 +1117,6 @@ function updateAnimation(
   mage.frameTimer += dt;
 
 
-  /*
-  走路稍快。
-
-  戰鬥等待稍慢。
-  */
-
   const frameSpeed =
   mage.state === "walk"
   ? 125
@@ -979,8 +1130,11 @@ function updateAnimation(
 
     mage.frameTimer = 0;
 
+
     mage.frame =
-    (mage.frame + 1) % 8;
+    (
+      mage.frame + 1
+    ) % 8;
 
   }
 
@@ -1000,45 +1154,27 @@ function updateAnimation(
 const skills = [
 
   {
-
     name:"🔥 Fire",
-
     icon:"🔥",
-
     range:145,
-
     damage:10,
-
     cooldown:1000
-
   },
 
   {
-
     name:"⚡ Lightning",
-
     icon:"⚡",
-
     range:145,
-
     damage:10,
-
     cooldown:1000
-
   },
 
   {
-
     name:"❄️ Ice",
-
     icon:"❄️",
-
     range:48,
-
     damage:7,
-
     cooldown:650
-
   }
 
 ];
@@ -1080,11 +1216,8 @@ function distance(
 ){
 
   return Math.hypot(
-
     a.x - b.x,
-
     a.y - b.y
-
   );
 
 }
@@ -1097,13 +1230,12 @@ function log(text){
     "div"
   );
 
+
   div.textContent =
   text;
 
 
-  logEl.appendChild(
-    div
-  );
+  logEl.appendChild(div);
 
 
   while(
@@ -1125,7 +1257,7 @@ function log(text){
 
 
 /* =========================
-   CREATE SLIME
+   SLIME
    ========================= */
 
 function createSlime(index){
@@ -1207,6 +1339,7 @@ function respawnSlime(
 
   const w =
   game.clientWidth;
+
 
   const h =
   game.clientHeight;
@@ -1375,7 +1508,7 @@ function findTarget(){
 
 
 /* =========================
-   SPELL EFFECT
+   EFFECT
    ========================= */
 
 function spellEffect(
@@ -1419,7 +1552,7 @@ function spellEffect(
 
 
 /* =========================
-   DAMAGE TEXT
+   DAMAGE
    ========================= */
 
 function damageText(
@@ -1483,6 +1616,7 @@ function killSlime(slime){
 
   kills++;
 
+
   exp += 10;
 
 
@@ -1490,6 +1624,10 @@ function killSlime(slime){
     "🟢 Slime 擊倒！ +10 EXP"
   );
 
+
+  /*
+  只有怪死亡才解除鎖定。
+  */
 
   unlockFacing();
 
@@ -1499,6 +1637,7 @@ function killSlime(slime){
   ){
 
     exp -= expNeed;
+
 
     level++;
 
@@ -1532,11 +1671,6 @@ function attack(
   now
 ){
 
-  /*
-  Cast 沒播完之前，
-  不准開始下一次施法。
-  */
-
   if(mage.casting)
     return;
 
@@ -1560,18 +1694,24 @@ function attack(
   now;
 
 
+  /*
+  這裡非常重要：
+
+  attack() 不直接播 Cast。
+
+  先鎖定敵人，
+  再開始 Cast。
+  */
+
+  lockFacing(target);
+
+
   startCast(
     target,
     skill,
     now
   );
 
-
-  /*
-  下一個技能先排好。
-
-  真正傷害由 Cast 中段觸發。
-  */
 
   mage.skillIndex =
   (
@@ -1637,6 +1777,7 @@ function enemyAttack(now){
 
       mage.hp = 0;
 
+
       updateHUD();
 
 
@@ -1669,6 +1810,10 @@ function enemyAttack(now){
       "down";
 
 
+      mage.castDirection =
+      "down";
+
+
       mage.casting =
       false;
 
@@ -1678,6 +1823,7 @@ function enemyAttack(now){
 
 
       unlockFacing();
+
 
       break;
 
@@ -1689,7 +1835,7 @@ function enemyAttack(now){
 
 
 /* =========================
-   MAGE AI
+   AI
    ========================= */
 
 function updateMage(
@@ -1726,6 +1872,29 @@ function updateMage(
   mage.target;
 
 
+  /*
+  Cast 期間：
+
+  不能走。
+  不能轉。
+  不能重新找方向。
+  */
+
+  if(mage.casting){
+
+    mage.state =
+    "combat";
+
+
+    stateText.textContent =
+    "施法中";
+
+
+    return;
+
+  }
+
+
   const dx =
   target.x -
   mage.x;
@@ -1750,29 +1919,9 @@ function updateMage(
 
 
   /*
-  Cast 中：
-  完全停止移動與轉向。
-  */
-
-  if(mage.casting){
-
-    mage.state =
-    "combat";
-
-
-    stateText.textContent =
-    "施法中";
-
-
-    return;
-
-  }
-
-
-  /*
-  ========================
-  MOVEMENT
-  ========================
+  =========================
+  MOVE
+  =========================
   */
 
   if(
@@ -1825,9 +1974,9 @@ function updateMage(
 
 
   /*
-  ========================
+  =========================
   COMBAT
-  ========================
+  =========================
   */
 
   else{
@@ -1836,15 +1985,17 @@ function updateMage(
     "combat";
 
 
+    /*
+    進射程立刻面向怪。
+    */
+
     if(
       !mage.facingLocked ||
       mage.lockedTargetId !==
       target.id
     ){
 
-      lockFacing(
-        target
-      );
+      lockFacing(target);
 
     }
 
@@ -2008,9 +2159,7 @@ function loop(now){
 
   if(!paused){
 
-    updateRespawns(
-      now
-    );
+    updateRespawns(now);
 
 
     updateMage(
@@ -2019,9 +2168,7 @@ function loop(now){
     );
 
 
-    enemyAttack(
-      now
-    );
+    enemyAttack(now);
 
 
     updateAnimation(
@@ -2038,9 +2185,7 @@ function loop(now){
   }
 
 
-  requestAnimationFrame(
-    loop
-  );
+  requestAnimationFrame(loop);
 
 }
 
@@ -2108,32 +2253,36 @@ function start(){
 
   updateVisual();
 
+
   updateHUD();
 
 
   log(
-    "✅ P0.2C-2 啟動"
+    "✅ P0.2C-3 啟動"
   );
 
 
   log(
-    "🧩 176×160 Fixed Atlas ON"
+    "🎯 Directional Cast ON"
   );
 
 
   log(
-    "🔒 P0.2B-4 Facing Lock ON"
+    "🔒 Facing → Lock → Cast"
   );
 
 
   log(
-    "✨ 8-frame Cast ON"
+    "⬇️ Down 使用完整 Cast 1~8"
   );
 
 
-  requestAnimationFrame(
-    loop
+  log(
+    "⬅️➡️⬆️ 保持正確面向施法"
   );
+
+
+  requestAnimationFrame(loop);
 
 }
 
