@@ -5,7 +5,7 @@
 <meta name="viewport"
 content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 
-<title>Mage Idle - P0.2B-2</title>
+<title>Mage Idle - P0.2B-3</title>
 
 <style>
 *{
@@ -70,6 +70,7 @@ button{
   box-shadow:inset 0 0 35px rgba(0,0,0,.22);
 }
 
+
 /* =========================
    MAGE
    ========================= */
@@ -95,21 +96,14 @@ button{
 
 #mageSheet{
   position:absolute;
-
   width:768px;
   height:512px;
-
   max-width:none;
-
   pointer-events:none;
-
-  /*
-  JS 現在會控制 left / top
-  */
-
   left:-59px;
   top:-22px;
 }
+
 
 /* =========================
    HP
@@ -137,6 +131,7 @@ button{
   bottom:2px;
 }
 
+
 /* =========================
    SLIME
    ========================= */
@@ -162,6 +157,7 @@ button{
   bottom:0;
 }
 
+
 /* =========================
    TARGET
    ========================= */
@@ -175,6 +171,7 @@ button{
   transform:translate(-50%,-50%);
   z-index:5;
 }
+
 
 /* =========================
    MAGIC
@@ -190,6 +187,7 @@ button{
 }
 
 @keyframes spellPop{
+
   0%{
     transform:translate(-50%,-50%) scale(.5);
     opacity:0;
@@ -204,6 +202,7 @@ button{
     transform:translate(-50%,-110%) scale(.8);
     opacity:0;
   }
+
 }
 
 .damage{
@@ -219,6 +218,7 @@ button{
 }
 
 @keyframes damageFloat{
+
   from{
     opacity:1;
   }
@@ -227,7 +227,9 @@ button{
     opacity:0;
     transform:translate(-50%,-100%);
   }
+
 }
+
 
 /* =========================
    PANEL
@@ -264,6 +266,7 @@ button{
   font-size:11px;
   line-height:1.4;
 }
+
 </style>
 </head>
 
@@ -271,7 +274,7 @@ button{
 
 <div id="app">
 
-<h2>⚔️ Mage Idle — P0.2B-2</h2>
+<h2>⚔️ Mage Idle — P0.2B-3</h2>
 
 <div id="topbar">
 
@@ -291,6 +294,7 @@ HP <span id="hpText">100</span>/100
 <button id="pauseBtn">暫停</button>
 
 </div>
+
 
 <div id="game">
 
@@ -313,32 +317,41 @@ alt="Mage">
 
 </div>
 
+
 <div id="panel">
 
 <div id="skillDisplay">
+
 下一技能：
-<strong id="nextSkill">🔥 Fire</strong>
+<strong id="nextSkill">
+🔥 Fire
+</strong>
+
 </div>
 
 <div id="log">
 
 <div class="debug">
-P0.2B-2 DEBUG
+P0.2B-3 FACING DEBUG
 </div>
 
 <div>
-方向動畫＋施法動畫啟動
+角色朝向系統啟動
 </div>
 
 </div>
 
 <div class="note">
-P0.2B-2：Idle / Down / Left / Right / Up / Cast
-</div>
+
+P0.2B-3：
+移動與戰鬥皆保持面向目前目標。
 
 </div>
 
 </div>
+
+</div>
+
 
 <script>
 
@@ -346,36 +359,61 @@ P0.2B-2：Idle / Down / Left / Right / Up / Cast
    DOM
    ========================= */
 
-const game=document.getElementById("game");
+const game=
+document.getElementById("game");
 
-const mageEl=document.getElementById("mage");
-const mageSheet=document.getElementById("mageSheet");
+const mageEl=
+document.getElementById("mage");
 
-const hpText=document.getElementById("hpText");
-const mageHpBar=document.getElementById("mageHp");
+const mageSheet=
+document.getElementById("mageSheet");
 
-const expEl=document.getElementById("exp");
-const expNeedEl=document.getElementById("expNeed");
-const levelEl=document.getElementById("level");
-const killsEl=document.getElementById("kills");
+const hpText=
+document.getElementById("hpText");
 
-const stateText=document.getElementById("stateText");
-const nextSkillEl=document.getElementById("nextSkill");
+const mageHpBar=
+document.getElementById("mageHp");
 
-const pauseBtn=document.getElementById("pauseBtn");
-const logEl=document.getElementById("log");
+const expEl=
+document.getElementById("exp");
+
+const expNeedEl=
+document.getElementById("expNeed");
+
+const levelEl=
+document.getElementById("level");
+
+const killsEl=
+document.getElementById("kills");
+
+const stateText=
+document.getElementById("stateText");
+
+const nextSkillEl=
+document.getElementById("nextSkill");
+
+const pauseBtn=
+document.getElementById("pauseBtn");
+
+const logEl=
+document.getElementById("log");
 
 
 /* =========================
-   STATE
+   GAME
    ========================= */
 
 let paused=false;
-let lastTime=performance.now();
+
+let lastTime=
+performance.now();
 
 let kills=0;
+
 let exp=0;
+
 let expNeed=100;
+
 let level=1;
 
 
@@ -385,180 +423,263 @@ let level=1;
 
 const mage={
 
-  x:0,
-  y:0,
+x:0,
+y:0,
 
-  hp:100,
-  maxHp:100,
+hp:100,
+maxHp:100,
 
-  speed:70,
+speed:70,
 
-  target:null,
+target:null,
 
-  skillIndex:0,
-  lastAttack:0,
+skillIndex:0,
 
-  state:"idle",
-  direction:"down",
+lastAttack:0,
 
-  frame:0,
-  frameTimer:0,
+state:"idle",
 
-  casting:false,
-  castStart:0,
-  castDuration:560
+direction:"down",
+
+frame:0,
+
+frameTimer:0
 
 };
 
 
 /* =========================
-   SPRITE ATLAS
+   SPRITE
    ========================= */
-
-/*
-P0.2B-1 已經證明：
-
-Idle 第一格大約：
-
-left = -59
-top  = -22
-
-現在利用實際圖片格子間距移動。
-
-縮放後：
-橫向一格約 83px
-縱向一排約 78px
-*/
 
 const SPRITE={
 
-  baseX:-59,
+baseX:-59,
 
-  stepX:83,
+stepX:83,
 
-  rows:{
+rows:{
 
-    idle:-22,
+idle:-22,
 
-    down:-100,
+down:-100,
 
-    left:-178,
+left:-178,
 
-    right:-256,
+right:-256,
 
-    up:-334,
+up:-334
 
-    cast:-412
-
-  }
+}
 
 };
+
+
+/* =========================
+   SPRITE POSITION
+   ========================= */
+
+function setSprite(
+row,
+frame
+){
+
+const x=
+SPRITE.baseX-
+(
+frame*
+SPRITE.stepX
+);
+
+const y=
+SPRITE.rows[row];
+
+
+mageSheet.style.left=
+x+"px";
+
+mageSheet.style.top=
+y+"px";
+
+}
+
+
+/* =========================
+   FACING SYSTEM
+   ========================= */
+
+/*
+   核心規則：
+
+   不使用單純 50/50 對角線。
+
+   方向切換加入 bias。
+
+   只有當另一個方向真的比較明顯時，
+   才改變角色朝向。
+
+   這能避免：
+   上 → 左 → 上 → 左
+   不斷抖動。
+*/
+
+function faceTarget(
+dx,
+dy
+){
+
+const ax=
+Math.abs(dx);
+
+const ay=
+Math.abs(dy);
+
+
+/*
+如果目前是左右朝向，
+垂直距離必須明顯大於水平距離
+才切換成上下。
+*/
+
+if(
+mage.direction==="left" ||
+mage.direction==="right"
+){
+
+if(
+ay >
+ax * 1.25
+){
+
+mage.direction=
+dy<0
+?"up"
+:"down";
+
+}
+else{
+
+mage.direction=
+dx<0
+?"left"
+:"right";
+
+}
+
+}
+
+
+/*
+如果目前是上下朝向，
+水平距離必須明顯大於垂直距離
+才切換左右。
+*/
+
+else{
+
+if(
+ax >
+ay * 1.25
+){
+
+mage.direction=
+dx<0
+?"left"
+:"right";
+
+}
+else{
+
+mage.direction=
+dy<0
+?"up"
+:"down";
+
+}
+
+}
+
+}
 
 
 /* =========================
    ANIMATION
    ========================= */
 
-function setSprite(row,frame){
+function updateAnimation(
+dt
+){
 
-  const x=
-  SPRITE.baseX-
-  (
-    frame*
-    SPRITE.stepX
-  );
+let row;
 
-  const y=
-  SPRITE.rows[row];
 
-  mageSheet.style.left=
-  x+"px";
+/*
+走路：
+播放方向動畫。
+*/
 
-  mageSheet.style.top=
-  y+"px";
+if(
+mage.state==="walk"
+){
+
+row=
+mage.direction;
 
 }
 
 
-function updateAnimation(dt,now){
+/*
+停止：
+不再回正面 Idle。
 
-  let animation="idle";
+而是停留在
+目前面向敵人的方向。
+*/
 
-  let speed=135;
+else{
 
+row=
+mage.direction;
 
-  /*
-  CAST 優先於所有動畫
-  */
-
-  if(mage.casting){
-
-    animation="cast";
-
-    speed=70;
+}
 
 
-    if(
-      now-mage.castStart
-      >=
-      mage.castDuration
-    ){
-
-      mage.casting=false;
-
-      mage.frame=0;
-      mage.frameTimer=0;
-
-    }
-
-  }
-
-  else if(
-    mage.state==="walk"
-  ){
-
-    animation=
-    mage.direction;
-
-    speed=105;
-
-  }
-
-  else{
-
-    animation="idle";
-
-    speed=150;
-
-  }
+mage.frameTimer+=dt;
 
 
-  mage.frameTimer+=dt;
+/*
+走路比較快。
+
+站立時只播放很慢的
+方向動畫，
+讓角色仍有呼吸感。
+*/
+
+const frameSpeed=
+mage.state==="walk"
+?105
+:230;
 
 
-  if(
-    mage.frameTimer>=speed
-  ){
+if(
+mage.frameTimer>=
+frameSpeed
+){
 
-    mage.frameTimer=0;
+mage.frameTimer=0;
 
-    mage.frame++;
+mage.frame=
+(
+mage.frame+1
+)%8;
 
-    if(
-      mage.frame>=8
-    ){
-
-      mage.frame=0;
-
-    }
-
-  }
+}
 
 
-  setSprite(
-    animation,
-    mage.frame
-  );
+setSprite(
+row,
+mage.frame
+);
 
 }
 
@@ -570,27 +691,45 @@ function updateAnimation(dt,now){
 const skills=[
 
 {
+
 name:"🔥 Fire",
+
 icon:"🔥",
+
 range:145,
+
 damage:10,
+
 cooldown:1000
+
 },
 
 {
+
 name:"⚡ Lightning",
+
 icon:"⚡",
+
 range:145,
+
 damage:10,
+
 cooldown:1000
+
 },
 
 {
+
 name:"❄️ Ice",
+
 icon:"❄️",
+
 range:48,
+
 damage:7,
+
 cooldown:650
+
 }
 
 ];
@@ -601,6 +740,7 @@ cooldown:650
    ========================= */
 
 const slimes=[];
+
 const SLIME_COUNT=8;
 
 
@@ -608,17 +748,27 @@ const SLIME_COUNT=8;
    HELPERS
    ========================= */
 
-function clamp(v,min,max){
+function clamp(
+v,
+min,
+max
+){
 
 return Math.max(
 min,
-Math.min(max,v)
+Math.min(
+max,
+v
+)
 );
 
 }
 
 
-function distance(a,b){
+function distance(
+a,
+b
+){
 
 return Math.hypot(
 a.x-b.x,
@@ -633,12 +783,16 @@ function log(text){
 const div=
 document.createElement("div");
 
-div.textContent=text;
+div.textContent=
+text;
 
-logEl.appendChild(div);
+logEl.appendChild(
+div
+);
 
 while(
-logEl.children.length>30
+logEl.children.length>
+30
 ){
 
 logEl.removeChild(
@@ -654,15 +808,18 @@ logEl.scrollHeight;
 
 
 /* =========================
-   SLIME
+   CREATE SLIME
    ========================= */
 
-function createSlime(index){
+function createSlime(
+index
+){
 
 const el=
 document.createElement("div");
 
-el.className="slime";
+el.className=
+"slime";
 
 el.innerHTML=`
 
@@ -676,7 +833,9 @@ el.innerHTML=`
 
 `;
 
-game.appendChild(el);
+game.appendChild(
+el
+);
 
 
 const slime={
@@ -684,9 +843,11 @@ const slime={
 id:index,
 
 x:0,
+
 y:0,
 
 hp:50,
+
 maxHp:50,
 
 attack:5,
@@ -694,17 +855,23 @@ attack:5,
 alive:true,
 
 respawnAt:0,
+
 lastAttack:0,
 
 el:el,
 
 hpEl:
-el.querySelector(".hp span")
+el.querySelector(
+".hp span"
+)
 
 };
 
 
-slimes.push(slime);
+slimes.push(
+slime
+);
+
 
 respawnSlime(
 slime,
@@ -714,13 +881,20 @@ true
 }
 
 
+/* =========================
+   RESPAWN
+   ========================= */
+
 function respawnSlime(
 slime,
 initial=false
 ){
 
-const w=game.clientWidth;
-const h=game.clientHeight;
+const w=
+game.clientWidth;
+
+const h=
+game.clientHeight;
 
 
 slime.x=
@@ -770,25 +944,38 @@ slime.alive=true;
 slime.el.style.display=
 "block";
 
-updateSlime(slime);
+
+updateSlime(
+slime
+);
 
 }
 
 
-function updateSlime(slime){
+/* =========================
+   UPDATE SLIME
+   ========================= */
+
+function updateSlime(
+slime
+){
 
 slime.el.style.left=
-slime.x+"px";
+slime.x+
+"px";
 
 slime.el.style.top=
-slime.y+"px";
+slime.y+
+"px";
+
 
 slime.hpEl.style.width=
 (
 slime.hp/
 slime.maxHp*
 100
-)+"%";
+)+
+"%";
 
 }
 
@@ -803,7 +990,9 @@ let targetRing=null;
 function createTargetRing(){
 
 targetRing=
-document.createElement("div");
+document.createElement(
+"div"
+);
 
 targetRing.className=
 "targetRing";
@@ -821,7 +1010,9 @@ targetRing
 function findTarget(){
 
 let best=null;
-let bestDistance=Infinity;
+
+let bestDistance=
+Infinity;
 
 
 for(
@@ -829,7 +1020,9 @@ const slime
 of slimes
 ){
 
-if(!slime.alive)
+if(
+!slime.alive
+)
 continue;
 
 
@@ -846,6 +1039,7 @@ bestDistance
 ){
 
 bestDistance=d;
+
 best=slime;
 
 }
@@ -853,43 +1047,14 @@ best=slime;
 }
 
 
-mage.target=best;
+mage.target=
+best;
 
 }
 
 
 /* =========================
-   DIRECTION
-   ========================= */
-
-function updateDirection(dx,dy){
-
-if(
-Math.abs(dx)>
-Math.abs(dy)
-){
-
-mage.direction=
-dx<0
-?"left"
-:"right";
-
-}
-
-else{
-
-mage.direction=
-dy<0
-?"up"
-:"down";
-
-}
-
-}
-
-
-/* =========================
-   EFFECT
+   MAGIC EFFECT
    ========================= */
 
 function spellEffect(
@@ -898,20 +1063,30 @@ skill
 ){
 
 const el=
-document.createElement("div");
+document.createElement(
+"div"
+);
 
-el.className="spell";
+el.className=
+"spell";
 
 el.textContent=
 skill.icon;
 
 el.style.left=
-target.x+"px";
+target.x+
+"px";
 
 el.style.top=
-(target.y-15)+"px";
+(
+target.y-15
+)+
+"px";
 
-game.appendChild(el);
+
+game.appendChild(
+el
+);
 
 
 setTimeout(
@@ -922,26 +1097,41 @@ setTimeout(
 }
 
 
+/* =========================
+   DAMAGE TEXT
+   ========================= */
+
 function damageText(
 target,
 amount
 ){
 
 const el=
-document.createElement("div");
+document.createElement(
+"div"
+);
 
-el.className="damage";
+el.className=
+"damage";
 
 el.textContent=
-"-"+amount;
+"-"+
+amount;
 
 el.style.left=
-target.x+"px";
+target.x+
+"px";
 
 el.style.top=
-(target.y-25)+"px";
+(
+target.y-25
+)+
+"px";
 
-game.appendChild(el);
+
+game.appendChild(
+el
+);
 
 
 setTimeout(
@@ -956,12 +1146,15 @@ setTimeout(
    KILL
    ========================= */
 
-function killSlime(slime){
+function killSlime(
+slime
+){
 
 slime.alive=false;
 
 slime.el.style.display=
 "none";
+
 
 slime.respawnAt=
 performance.now()+
@@ -969,6 +1162,7 @@ performance.now()+
 
 
 kills++;
+
 exp+=10;
 
 
@@ -989,6 +1183,7 @@ expNeed=
 Math.floor(
 expNeed*1.25
 );
+
 
 log(
 "✨ 升級！ Lv."+
@@ -1027,21 +1222,24 @@ skill.cooldown
 return;
 
 
-mage.lastAttack=
-now;
-
-
 /*
-啟動 Cast 動畫
+攻擊前再次鎖定方向。
+
+這是 P0.2B-3
+最重要的一行之一。
 */
 
-mage.casting=true;
+faceTarget(
+target.x-
+mage.x,
 
-mage.castStart=now;
+target.y-
+mage.y
+);
 
-mage.frame=0;
 
-mage.frameTimer=0;
+mage.lastAttack=
+now;
 
 
 spellEffect(
@@ -1111,14 +1309,18 @@ mage.skillIndex
    ENEMY ATTACK
    ========================= */
 
-function enemyAttack(now){
+function enemyAttack(
+now
+){
 
 for(
 const slime
 of slimes
 ){
 
-if(!slime.alive)
+if(
+!slime.alive
+)
 continue;
 
 
@@ -1129,7 +1331,9 @@ slime
 );
 
 
-if(d>52)
+if(
+d>52
+)
 continue;
 
 
@@ -1142,7 +1346,9 @@ slime.lastAttack
 continue;
 
 
-slime.lastAttack=now;
+slime.lastAttack=
+now;
+
 
 mage.hp-=
 slime.attack;
@@ -1153,6 +1359,7 @@ mage.hp<=0
 ){
 
 mage.hp=0;
+
 
 updateHUD();
 
@@ -1167,16 +1374,23 @@ mage.maxHp;
 
 
 mage.x=
-game.clientWidth/2;
+game.clientWidth/
+2;
 
 
 mage.y=
-game.clientHeight-80;
+game.clientHeight-
+80;
 
 
 mage.target=null;
 
-mage.state="idle";
+mage.state=
+"idle";
+
+mage.direction=
+"down";
+
 
 break;
 
@@ -1188,7 +1402,7 @@ break;
 
 
 /* =========================
-   AI
+   MAGE AI
    ========================= */
 
 function updateMage(
@@ -1206,12 +1420,17 @@ findTarget();
 }
 
 
-if(!mage.target){
+if(
+!mage.target
+){
 
-mage.state="idle";
+mage.state=
+"idle";
+
 
 stateText.textContent=
 "等待怪物";
+
 
 return;
 
@@ -1239,7 +1458,12 @@ dy
 );
 
 
-updateDirection(
+/*
+無論走路或站著，
+永遠持續面向目標。
+*/
+
+faceTarget(
 dx,
 dy
 );
@@ -1256,7 +1480,9 @@ d>
 skill.range
 ){
 
-mage.state="walk";
+mage.state=
+"walk";
+
 
 stateText.textContent=
 "移動中";
@@ -1264,7 +1490,9 @@ stateText.textContent=
 
 const step=
 mage.speed*
-(dt/1000);
+(
+dt/1000
+);
 
 
 mage.x+=
@@ -1286,12 +1514,12 @@ d
 
 else{
 
-mage.state="idle";
+mage.state=
+"combat";
+
 
 stateText.textContent=
-mage.casting
-?"施法中"
-:"戰鬥中";
+"面向目標";
 
 
 attack(
@@ -1306,7 +1534,8 @@ mage.x=
 clamp(
 mage.x,
 42,
-game.clientWidth-42
+game.clientWidth-
+42
 );
 
 
@@ -1314,7 +1543,8 @@ mage.y=
 clamp(
 mage.y,
 48,
-game.clientHeight-48
+game.clientHeight-
+48
 );
 
 }
@@ -1324,7 +1554,9 @@ game.clientHeight-48
    RESPAWN
    ========================= */
 
-function updateRespawns(now){
+function updateRespawns(
+now
+){
 
 for(
 const slime
@@ -1340,6 +1572,7 @@ slime.respawnAt
 respawnSlime(
 slime
 );
+
 
 log(
 "🟢 Slime 重生"
@@ -1359,10 +1592,12 @@ log(
 function updateVisual(){
 
 mageEl.style.left=
-mage.x+"px";
+mage.x+
+"px";
 
 mageEl.style.top=
-mage.y+"px";
+mage.y+
+"px";
 
 
 if(
@@ -1373,13 +1608,18 @@ mage.target.alive
 targetRing.style.display=
 "block";
 
+
 targetRing.style.left=
-mage.target.x+"px";
+mage.target.x+
+"px";
+
 
 targetRing.style.top=
 (
-mage.target.y+14
-)+"px";
+mage.target.y+
+14
+)+
+"px";
 
 }
 
@@ -1408,7 +1648,8 @@ mageHpBar.style.width=
 mage.hp/
 mage.maxHp*
 100
-)+"%";
+)+
+"%";
 
 
 expEl.textContent=
@@ -1430,34 +1671,49 @@ kills;
    LOOP
    ========================= */
 
-function loop(now){
+function loop(
+now
+){
 
 const dt=
 Math.min(
 50,
-now-lastTime
+now-
+lastTime
 );
 
-lastTime=now;
+
+lastTime=
+now;
 
 
-if(!paused){
+if(
+!paused
+){
 
-updateRespawns(now);
+updateRespawns(
+now
+);
+
 
 updateMage(
 dt,
 now
 );
 
-enemyAttack(now);
 
-updateAnimation(
-dt,
+enemyAttack(
 now
 );
 
+
+updateAnimation(
+dt
+);
+
+
 updateVisual();
+
 
 updateHUD();
 
@@ -1506,11 +1762,13 @@ paused
 function start(){
 
 mage.x=
-game.clientWidth/2;
+game.clientWidth/
+2;
 
 
 mage.y=
-game.clientHeight-80;
+game.clientHeight-
+80;
 
 
 createTargetRing();
@@ -1518,8 +1776,7 @@ createTargetRing();
 
 for(
 let i=0;
-i<SLIME_COUNT;
-i++
+i<SLIME_COUNT;i++
 ){
 
 createSlime(i);
@@ -1528,7 +1785,7 @@ createSlime(i);
 
 
 setSprite(
-"idle",
+"down",
 0
 );
 
@@ -1539,17 +1796,17 @@ updateHUD();
 
 
 log(
-"✅ P0.2B-2 啟動"
+"✅ P0.2B-3 啟動"
 );
 
 
 log(
-"🏃 方向走路動畫 ON"
+"👁 Facing System ON"
 );
 
 
 log(
-"✨ Cast 施法動畫 ON"
+"🎯 Mage 會持續面向目標"
 );
 
 
