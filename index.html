@@ -54,41 +54,38 @@ h2{margin:4px 0 10px}
 }
 
 /* 法師遊戲物件 */
-#mage{
+##mage{
   position:absolute;
-  width:58px;
-  height:72px;
+  width:48px;
+  height:62px;
   z-index:10;
 }
 
-/* 從美術母版中顯示法師。
-   P0.2A 先使用固定角色畫面，
-   P0.2B 再拆真正逐幀動畫。 */
 #mageSprite{
   position:absolute;
-  width:58px;
-  height:62px;
+  width:48px;
+  height:52px;
   left:0;
   top:0;
   overflow:hidden;
-  filter:drop-shadow(0 4px 2px rgba(0,0,0,.35));
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.35));
 }
 
 #mageSprite img{
   position:absolute;
-
-  /*
-   原始圖 1536×1024。
-   這裡把整張縮小後，用容器裁出第一排法師。
-  */
-  width:576px;
-  height:384px;
-
-  left:-65px;
-  top:-4px;
-
+  width:480px;
+  height:320px;
+  left:-54px;
+  top:-3px;
   max-width:none;
   pointer-events:none;
+}
+
+#mage .hp{
+  left:2px;
+  right:2px;
+  bottom:0;
+}
 }
 
 #mage.walking{
