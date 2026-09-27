@@ -3,28 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mage Idle - P0</title>
+<title>Mage Idle - P0.2A</title>
 
 <style>
 *{box-sizing:border-box}
+
 body{
   margin:0;
   background:#172018;
   color:#fff;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
+
 #game{
   max-width:700px;
   margin:auto;
   padding:12px;
 }
+
 h2{margin:4px 0 10px}
+
 .top{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:8px;
   margin-bottom:8px;
 }
+
 .card{
   background:#253126;
   border:1px solid #455846;
@@ -32,6 +37,7 @@ h2{margin:4px 0 10px}
   padding:8px;
   text-align:center;
 }
+
 #field{
   position:relative;
   height:420px;
@@ -39,34 +45,88 @@ h2{margin:4px 0 10px}
   border:2px solid #536c50;
   border-radius:12px;
   background:
+    radial-gradient(circle at 15% 25%,#78995e 0 3px,transparent 4px),
+    radial-gradient(circle at 75% 65%,#78995e 0 3px,transparent 4px),
     linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
     linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px),
     #668a52;
-  background-size:24px 24px;
+  background-size:auto,auto,24px 24px,24px 24px;
 }
-.unit{
+
+/* 法師遊戲物件 */
+#mage{
+  position:absolute;
+  width:58px;
+  height:72px;
+  z-index:10;
+}
+
+/* 從美術母版中顯示法師。
+   P0.2A 先使用固定角色畫面，
+   P0.2B 再拆真正逐幀動畫。 */
+#mageSprite{
+  position:absolute;
+  width:58px;
+  height:62px;
+  left:0;
+  top:0;
+  overflow:hidden;
+  filter:drop-shadow(0 4px 2px rgba(0,0,0,.35));
+}
+
+#mageSprite img{
+  position:absolute;
+
+  /*
+   原始圖 1536×1024。
+   這裡把整張縮小後，用容器裁出第一排法師。
+  */
+  width:576px;
+  height:384px;
+
+  left:-65px;
+  top:-4px;
+
+  max-width:none;
+  pointer-events:none;
+}
+
+#mage.walking{
+  animation:bob .32s infinite alternate ease-in-out;
+}
+
+@keyframes bob{
+  from{transform:translateY(0)}
+  to{transform:translateY(-2px)}
+}
+
+.hp{
+  position:absolute;
+  left:4px;
+  right:4px;
+  bottom:0;
+  height:5px;
+  background:#222;
+  border-radius:4px;
+  overflow:hidden;
+}
+
+.hp span{
+  display:block;
+  height:100%;
+  background:#9ee36a;
+}
+
+.slime{
   position:absolute;
   width:42px;
   height:42px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
+  font-size:27px;
 }
-.slime{font-size:25px}
-.hp{
-  position:absolute;
-  left:2px;
-  right:2px;
-  bottom:-4px;
-  height:5px;
-  background:#333;
-}
-.hp span{
-  display:block;
-  height:100%;
-  background:#9ee36a;
-}
+
 #debug{
   margin-top:10px;
   background:#080b09;
@@ -78,12 +138,14 @@ h2{margin:4px 0 10px}
   line-height:1.55;
   white-space:pre-line;
 }
+
 #event{
   background:#253126;
   margin-top:8px;
   padding:9px;
   border-radius:9px;
 }
+
 button{
   width:100%;
   margin-top:8px;
@@ -92,26 +154,55 @@ button{
   border:0;
   border-radius:10px;
 }
+
 .pop{
   position:absolute;
   font-size:12px;
   font-weight:bold;
-  background:#111c;
+  background:#111d;
   padding:3px 6px;
   border-radius:6px;
-  z-index:20;
+  z-index:30;
   animation:rise .8s forwards;
 }
+
 @keyframes rise{
-  to{transform:translateY(-25px);opacity:0}
+  to{
+    transform:translateY(-25px);
+    opacity:0;
+  }
+}
+
+.spell{
+  position:absolute;
+  z-index:25;
+  pointer-events:none;
+  font-size:22px;
+  animation:spellHit .35s forwards;
+}
+
+@keyframes spellHit{
+  0%{
+    transform:scale(.4);
+    opacity:.3;
+  }
+  60%{
+    transform:scale(1.5);
+    opacity:1;
+  }
+  100%{
+    transform:scale(.8);
+    opacity:0;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <div id="game">
 
-<h2>⚔️ Mage Idle — P0</h2>
+<h2>⚔️ Mage Idle — P0.2A</h2>
 
 <div class="top">
   <div class="card">LV<br><b>1</b></div>
@@ -120,13 +211,22 @@ button{
 </div>
 
 <div id="field">
-  <div id="mage" class="unit">
-    🧙
-    <div class="hp"><span id="mageHP"></span></div>
+
+  <div id="mage">
+    <div id="mageSprite">
+      <img
+        src="C9B2133B-1550-4C46-99CF-F0C981B1C3AF.png"
+        alt="Mage">
+    </div>
+
+    <div class="hp">
+      <span id="mageHP"></span>
+    </div>
   </div>
+
 </div>
 
-<div id="event">P0 啟動中...</div>
+<div id="event">P0.2A 啟動中...</div>
 
 <button id="pause">⏸ 暫停</button>
 
@@ -137,33 +237,44 @@ button{
 <script>
 "use strict";
 
-const field = document.getElementById("field");
-const mageEl = document.getElementById("mage");
-const debugEl = document.getElementById("debug");
-const eventEl = document.getElementById("event");
+const field =
+  document.getElementById("field");
 
-let running = true;
-let exp = 0;
-let kills = 0;
+const mageEl =
+  document.getElementById("mage");
 
-let mage = {
-  x: 160,
-  y: 320,
-  hp: 100,
-  maxHp: 100,
-  speed: 70
+const mageSprite =
+  document.getElementById("mageSprite");
+
+const debugEl =
+  document.getElementById("debug");
+
+const eventEl =
+  document.getElementById("event");
+
+let running=true;
+let exp=0;
+let kills=0;
+
+let mage={
+  x:160,
+  y:320,
+  hp:100,
+  maxHp:100,
+  speed:70,
+  facing:"down"
 };
 
-let enemies = [];
-let target = null;
+let enemies=[];
+let target=null;
 
-let skillIndex = 0;
-let lastCast = 0;
-let lastEnemyAttack = 0;
+let skillIndex=0;
+let lastCast=0;
+let lastEnemyAttack=0;
 
-let aiState = "BOOT";
+let aiState="BOOT";
 
-const skills = [
+const skills=[
   {
     name:"Fire",
     icon:"🔥",
@@ -188,17 +299,23 @@ const skills = [
 ];
 
 function random(min,max){
-  return min + Math.random()*(max-min);
+  return min+Math.random()*(max-min);
 }
 
 function distance(a,b){
-  return Math.hypot(a.x-b.x,a.y-b.y);
+  return Math.hypot(
+    a.x-b.x,
+    a.y-b.y
+  );
 }
 
 function createSlime(id){
 
-  const el=document.createElement("div");
-  el.className="unit slime";
+  const el=
+    document.createElement("div");
+
+  el.className="slime";
+
   el.innerHTML=
     '🟢<div class="hp"><span></span></div>';
 
@@ -224,15 +341,20 @@ function drawSlime(s){
   s.el.style.left=s.x+"px";
   s.el.style.top=s.y+"px";
 
-  const hp=s.el.querySelector("span");
+  const hp=
+    s.el.querySelector("span");
 
   hp.style.width=
-    Math.max(0,(s.hp/s.maxHp)*100)+"%";
+    Math.max(
+      0,
+      (s.hp/s.maxHp)*100
+    )+"%";
 }
 
 function popup(s,text){
 
-  const p=document.createElement("div");
+  const p=
+    document.createElement("div");
 
   p.className="pop";
   p.textContent=text;
@@ -247,22 +369,50 @@ function popup(s,text){
   },800);
 }
 
+function spellEffect(s,icon){
+
+  const fx=
+    document.createElement("div");
+
+  fx.className="spell";
+  fx.textContent=icon;
+
+  fx.style.left=
+    (s.x+8)+"px";
+
+  fx.style.top=
+    (s.y+3)+"px";
+
+  field.appendChild(fx);
+
+  setTimeout(()=>{
+    fx.remove();
+  },350);
+}
+
 function kill(s){
 
-  if(s.dead) return;
+  if(s.dead)return;
 
   s.dead=true;
 
   kills++;
   exp+=10;
 
-  document.getElementById("kills").textContent=kills;
-  document.getElementById("exp").textContent=exp;
+  document
+    .getElementById("kills")
+    .textContent=kills;
+
+  document
+    .getElementById("exp")
+    .textContent=exp;
 
   s.el.style.opacity="0.2";
 
   eventEl.textContent=
-    "擊倒 Slime #"+s.id+"，獲得 10 EXP";
+    "擊倒 Slime #"+
+    s.id+
+    "，獲得 10 EXP";
 
   if(target===s){
     target=null;
@@ -273,7 +423,12 @@ function kill(s){
     s.hp=50;
     s.dead=false;
 
-    s.x=random(15,field.clientWidth-55);
+    s.x=
+      random(
+        15,
+        field.clientWidth-55
+      );
+
     s.y=random(30,300);
 
     s.el.style.opacity="1";
@@ -285,15 +440,19 @@ function kill(s){
 
 function damage(s,value){
 
-  if(s.dead) return;
+  if(s.dead)return;
 
   s.hp-=value;
 
-  popup(s,"-"+value);
+  popup(
+    s,
+    "-"+value
+  );
 
   if(s.hp<=0){
 
     s.hp=0;
+
     drawSlime(s);
     kill(s);
 
@@ -306,60 +465,166 @@ function damage(s,value){
 
 function findTarget(){
 
-  const alive=enemies.filter(e=>!e.dead);
+  const alive=
+    enemies.filter(
+      e=>!e.dead
+    );
 
   if(alive.length===0){
     return null;
   }
 
   alive.sort(
-    (a,b)=>distance(mage,a)-distance(mage,b)
+    (a,b)=>
+      distance(mage,a)-
+      distance(mage,b)
   );
 
   return alive[0];
 }
 
-function moveToward(obj,target,speed,dt){
+function updateFacing(target){
 
-  const dx=target.x-obj.x;
-  const dy=target.y-obj.y;
+  const dx=
+    target.x-mage.x;
 
-  const len=Math.hypot(dx,dy);
+  const dy=
+    target.y-mage.y;
 
-  if(len===0) return;
+  if(
+    Math.abs(dx)>
+    Math.abs(dy)
+  ){
 
-  obj.x += (dx/len)*speed*dt;
-  obj.y += (dy/len)*speed*dt;
+    mage.facing=
+      dx<0
+      ?"left"
+      :"right";
+
+  }else{
+
+    mage.facing=
+      dy<0
+      ?"up"
+      :"down";
+  }
+}
+
+function drawFacing(){
+
+  /*
+   P0.2A：
+   先用同一張人物圖，
+   左右方向用翻轉表示。
+
+   P0.2B：
+   會正式切換四方向動畫列。
+  */
+
+  if(mage.facing==="left"){
+
+    mageSprite.style.transform=
+      "scaleX(-1)";
+
+  }else{
+
+    mageSprite.style.transform=
+      "scaleX(1)";
+  }
+}
+
+function moveToward(
+  obj,
+  target,
+  speed,
+  dt
+){
+
+  const dx=
+    target.x-obj.x;
+
+  const dy=
+    target.y-obj.y;
+
+  const len=
+    Math.hypot(dx,dy);
+
+  if(len===0)return;
+
+  obj.x+=
+    (dx/len)*
+    speed*
+    dt;
+
+  obj.y+=
+    (dy/len)*
+    speed*
+    dt;
 }
 
 function castSpell(s,now){
 
-  const skill=skills[skillIndex];
+  const skill=
+    skills[skillIndex];
 
-  damage(s,skill.damage);
+  updateFacing(s);
 
-  popup(s,skill.icon+" "+skill.name);
+  damage(
+    s,
+    skill.damage
+  );
+
+  spellEffect(
+    s,
+    skill.icon
+  );
+
+  popup(
+    s,
+    skill.icon+
+    " "+
+    skill.name
+  );
 
   eventEl.textContent=
-    "施放 "+skill.icon+" "+skill.name+
-    " → Slime #"+s.id;
+    "施放 "+
+    skill.icon+
+    " "+
+    skill.name+
+    " → Slime #"+
+    s.id;
 
   lastCast=now;
 
   skillIndex++;
 
-  if(skillIndex>=skills.length){
+  if(
+    skillIndex>=
+    skills.length
+  ){
     skillIndex=0;
   }
 }
 
 function enemyAttack(now){
 
-  if(!target || target.dead) return;
+  if(
+    !target||
+    target.dead
+  )return;
 
-  if(distance(mage,target)>52) return;
+  if(
+    distance(
+      mage,
+      target
+    )>52
+  )return;
 
-  if(now-lastEnemyAttack<1000) return;
+  if(
+    now-
+    lastEnemyAttack<
+    1000
+  )return;
 
   lastEnemyAttack=now;
 
@@ -369,7 +634,9 @@ function enemyAttack(now){
 
     mage.hp=100;
 
-    mage.x=field.clientWidth/2;
+    mage.x=
+      field.clientWidth/2;
+
     mage.y=340;
 
     target=null;
@@ -381,28 +648,55 @@ function enemyAttack(now){
 
 function update(now,dt){
 
-  if(!running) return;
+  if(!running){
 
-  if(!target || target.dead){
+    mageEl
+      .classList
+      .remove("walking");
 
-    aiState="SEARCH";
-
-    target=findTarget();
-
-  }
-
-  if(!target){
-    aiState="WAIT";
     return;
   }
 
-  const skill=skills[skillIndex];
+  if(
+    !target||
+    target.dead
+  ){
 
-  const d=distance(mage,target);
+    aiState="SEARCH";
+
+    target=
+      findTarget();
+  }
+
+  if(!target){
+
+    aiState="WAIT";
+
+    mageEl
+      .classList
+      .remove("walking");
+
+    return;
+  }
+
+  updateFacing(target);
+
+  const skill=
+    skills[skillIndex];
+
+  const d=
+    distance(
+      mage,
+      target
+    );
 
   if(d>skill.range){
 
     aiState="MOVE";
+
+    mageEl
+      .classList
+      .add("walking");
 
     moveToward(
       mage,
@@ -415,12 +709,21 @@ function update(now,dt){
 
     aiState="CAST";
 
-    if(now-lastCast>=skill.cooldown){
+    mageEl
+      .classList
+      .remove("walking");
 
-      castSpell(target,now);
+    if(
+      now-
+      lastCast>=
+      skill.cooldown
+    ){
 
+      castSpell(
+        target,
+        now
+      );
     }
-
   }
 
   enemyAttack(now);
@@ -428,11 +731,21 @@ function update(now,dt){
 
 function draw(){
 
-  mageEl.style.left=mage.x+"px";
-  mageEl.style.top=mage.y+"px";
+  mageEl.style.left=
+    mage.x+"px";
 
-  document.getElementById("mageHP").style.width=
-    mage.hp+"%";
+  mageEl.style.top=
+    mage.y+"px";
+
+  document
+    .getElementById("mageHP")
+    .style.width=
+      Math.max(
+        0,
+        mage.hp
+      )+"%";
+
+  drawFacing();
 }
 
 function debug(){
@@ -440,25 +753,45 @@ function debug(){
   let targetText="NONE";
   let distText="-";
 
-  if(target && !target.dead){
+  if(
+    target&&
+    !target.dead
+  ){
 
-    targetText="Slime #"+target.id;
-    distText=Math.round(distance(mage,target));
+    targetText=
+      "Slime #"+
+      target.id;
 
+    distText=
+      Math.round(
+        distance(
+          mage,
+          target
+        )
+      );
   }
 
-  const skill=skills[skillIndex];
+  const skill=
+    skills[skillIndex];
 
   debugEl.textContent=
-`P0 DEBUG
-Combat Loop: ${running ? "RUNNING":"PAUSED"}
+`P0.2A DEBUG
+
+Combat Loop:
+${running?"RUNNING":"PAUSED"}
+
 AI: ${aiState}
+Facing: ${mage.facing}
 
 Target: ${targetText}
 Distance: ${distText}px
 
-Mage HP: ${mage.hp}/100
-Position: ${Math.round(mage.x)}, ${Math.round(mage.y)}
+Mage HP:
+${mage.hp}/100
+
+Position:
+${Math.round(mage.x)},
+${Math.round(mage.y)}
 
 Current Skill:
 ${skill.icon} ${skill.name}
@@ -470,12 +803,16 @@ Kills: ${kills}
 EXP: ${exp}`;
 }
 
-let previous=performance.now();
+let previous=
+  performance.now();
 
 function gameLoop(now){
 
   const dt=
-    Math.min((now-previous)/1000,0.05);
+    Math.min(
+      (now-previous)/1000,
+      0.05
+    );
 
   previous=now;
 
@@ -483,41 +820,62 @@ function gameLoop(now){
   draw();
   debug();
 
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(
+    gameLoop
+  );
 }
 
 document
-.getElementById("pause")
-.addEventListener("click",function(){
+  .getElementById("pause")
+  .addEventListener(
+    "click",
+    function(){
 
-  running=!running;
+      running=
+        !running;
 
-  this.textContent=
-    running
-    ? "⏸ 暫停"
-    : "▶ 繼續";
+      this.textContent=
+        running
+        ?"⏸ 暫停"
+        :"▶ 繼續";
+    }
+  );
 
-});
-
-window.onerror=function(message){
+window.onerror=
+function(
+  message,
+  source,
+  line
+){
 
   debugEl.textContent=
-    "❌ JAVASCRIPT ERROR\n"+message;
-
+    "❌ JAVASCRIPT ERROR\n"+
+    message+
+    "\nLine: "+
+    line;
 };
 
-for(let i=1;i<=8;i++){
+for(
+  let i=1;
+  i<=8;
+  i++
+){
   createSlime(i);
 }
 
-mage.x=field.clientWidth/2;
+mage.x=
+  field.clientWidth/2;
+
 mage.y=340;
 
 eventEl.textContent=
-  "✅ P0 Combat Loop 已啟動";
+  "✅ P0.2A 白髮法師測試啟動";
 
-requestAnimationFrame(gameLoop);
+requestAnimationFrame(
+  gameLoop
+);
 
 </script>
+
 </body>
 </html>
