@@ -5,9 +5,10 @@
 <meta name="viewport"
 content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<title>Mage Idle P0.3A-3</title>
+<title>Mage Idle P0.3A-4</title>
 
 <style>
+
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -46,7 +47,7 @@ h1{
   border-radius:10px;
   padding:10px 12px;
   margin-bottom:10px;
-  line-height:1.7;
+  line-height:1.8;
   font-size:14px;
 }
 
@@ -60,7 +61,7 @@ h1{
   font-weight:bold;
 }
 
-#size{
+#loadStatus{
   color:#f2cc60;
 }
 
@@ -70,8 +71,10 @@ h1{
 
 #game{
   position:relative;
+
   width:100%;
   height:520px;
+
   overflow:hidden;
 
   border:2px solid #42643b;
@@ -95,25 +98,26 @@ h1{
 }
 
 /* =========================
-   MAGE
+   PLAYER
 ========================= */
 
 #mage{
   position:absolute;
 
-  width:112px;
+  width:110px;
   height:120px;
 
   transform:translate(-50%,-85%);
 
   pointer-events:none;
+
   z-index:10;
 }
 
 #shadow{
   position:absolute;
 
-  width:44px;
+  width:46px;
   height:12px;
 
   left:50%;
@@ -123,45 +127,58 @@ h1{
 
   border-radius:50%;
 
-  background:rgba(0,0,0,.24);
+  background:rgba(0,0,0,.25);
 }
 
 /*
-  顯示窗口。
+  每張方向圖只有3幀。
 
-  比實際CELL稍微小一點，
-  用來切掉最外圍容易出現的碎片。
+  顯示窗口只負責顯示其中1幀。
 */
 
 #spriteWindow{
   position:absolute;
 
-  width:96px;
-  height:96px;
+  width:100px;
+  height:100px;
 
-  left:8px;
-  bottom:14px;
+  left:5px;
+  bottom:13px;
 
   overflow:hidden;
 }
 
 /*
-  真正的Sprite Sheet。
+  圖片永遠縮放成：
+
+  300px × 100px
+
+  所以：
+
+  Frame 1 = 0
+  Frame 2 = -100
+  Frame 3 = -200
 */
 
 #sprite{
   position:absolute;
+
+  left:0;
+  top:0;
+
+  width:300px;
+  height:100px;
 
   max-width:none;
 
   pointer-events:none;
   user-select:none;
 
-  image-rendering:auto;
+  object-fit:fill;
 }
 
 /* =========================
-   CONTROLS
+   BUTTONS
 ========================= */
 
 #controls{
@@ -179,10 +196,14 @@ button{
   border-radius:9px;
 
   background:#30363d;
-  color:white;
+  color:#fff;
 
   font-size:14px;
   font-weight:bold;
+}
+
+button:active{
+  transform:scale(.98);
 }
 
 #info{
@@ -196,14 +217,14 @@ button{
   border-radius:10px;
 
   font-size:13px;
-  line-height:1.7;
+  line-height:1.8;
 }
 
 .good{
   color:#7ee787;
 }
 
-.clean{
+.new{
   color:#58a6ff;
 }
 
@@ -214,12 +235,11 @@ button{
 
 <div id="app">
 
-<h1>🧙 Mage Idle — P0.3A-3</h1>
+<h1>🧙 Mage Idle — P0.3A-4</h1>
 
 <div id="sub">
-Clean Frame 動畫測試
+Independent Animation Strip Test
 </div>
-
 
 <div id="status">
 
@@ -233,8 +253,8 @@ Clean Frame 動畫測試
 
 <br>
 
-Sprite：
-<span id="size">等待圖片</span>
+素材：
+<span id="loadStatus">載入中...</span>
 
 </div>
 
@@ -249,7 +269,6 @@ Sprite：
 
       <img
         id="sprite"
-        src="31C9D3E8-52BE-4F63-B558-198195F25DD7.png"
         alt=""
       >
 
@@ -275,24 +294,28 @@ Sprite：
 
 <div id="info">
 
-<div class="good">
-✓ P0.3 動畫架構
+<div class="new">
+★ P0.3A-4 新架構
 </div>
 
 <div class="good">
-✓ Down / Left / Right / Up
+✓ 四方向使用四張獨立素材
 </div>
 
-<div class="clean">
-✓ Clean Frame 安全裁切
+<div class="good">
+✓ 每個方向只有3個Frame
 </div>
 
-<div class="clean">
-✓ 使用圖片真正尺寸計算
+<div class="good">
+✓ 不再使用9×5 Sprite Atlas
+</div>
+
+<div class="good">
+✓ 不再計算 Row
 </div>
 
 <div>
-↓ → ← → → → ↑ 自動循環
+測試：↓ → ← → → → ↑
 </div>
 
 <div>
@@ -306,9 +329,16 @@ Sprite：
 
 <script>
 
-/* ======================================
-   P0.3A-3 CLEAN FRAME
-====================================== */
+/* =====================================
+   P0.3A-4
+
+   INDEPENDENT DIRECTION STRIPS
+===================================== */
+
+
+/* =====================================
+   DOM
+===================================== */
 
 const game =
 document.getElementById("game");
@@ -319,17 +349,14 @@ document.getElementById("mage");
 const sprite =
 document.getElementById("sprite");
 
-const spriteWindow =
-document.getElementById("spriteWindow");
-
 const actionText =
 document.getElementById("action");
 
 const frameText =
 document.getElementById("frame");
 
-const sizeText =
-document.getElementById("size");
+const loadStatus =
+document.getElementById("loadStatus");
 
 const pauseButton =
 document.getElementById("pause");
@@ -338,208 +365,105 @@ const restartButton =
 document.getElementById("restart");
 
 
-/* ======================================
-   SPRITE CONFIG
-====================================== */
+/* =====================================
+   ASSETS
 
-const COLS = 9;
+   四個方向完全分開。
+===================================== */
 
-const ROWS = 5;
+const ASSETS = {
 
+  down:
+  "06466AC9-5FD2-4A22-86AC-DFC8AEAD9A13.png",
 
-/*
-  每格在遊戲中的基準尺寸。
-*/
+  left:
+  "EB51F3E3-D18E-4AB0-B2C4-506E861C063E.png",
 
-const CELL = 100;
+  right:
+  "AAE68541-E5B4-47C2-804F-AE34916AE464.png",
 
-
-/*
-  安全裁切。
-
-  每一格四周各吃掉2px。
-
-  所以實際可見：
-  96 × 96
-*/
-
-const SAFE = 2;
-
-
-const ROW = {
-
-  idle:0,
-
-  down:1,
-
-  left:2,
-
-  right:3,
-
-  up:4
+  up:
+  "777B5A50-9583-4181-AD02-6A7AC73F6D4B.png"
 
 };
 
 
-let spriteReady = false;
+/* =====================================
+   PRELOAD
+
+   先把四張全部載入。
+
+   避免換方向時閃一下。
+===================================== */
+
+const cache = {};
+
+let loadedCount = 0;
+
+let ready = false;
 
 
-/*
-  真實圖片資訊。
-*/
+Object.keys(ASSETS).forEach(
 
-let naturalWidth = 0;
+  function(direction){
 
-let naturalHeight = 0;
-
-let sourceCellWidth = 0;
-
-let sourceCellHeight = 0;
+    const img =
+      new Image();
 
 
-/* ======================================
-   IMAGE LOAD
-====================================== */
+    img.onload =
+    function(){
 
-sprite.onload = function(){
-
-  naturalWidth =
-    sprite.naturalWidth;
-
-  naturalHeight =
-    sprite.naturalHeight;
+      loadedCount++;
 
 
-  /*
-    真實來源格尺寸。
+      loadStatus.textContent =
 
-    例如目前錄影看到：
-
-    1663 × 946
-
-    這裡不再寫死。
-  */
-
-  sourceCellWidth =
-    naturalWidth / COLS;
-
-  sourceCellHeight =
-    naturalHeight / ROWS;
+        loadedCount +
+        " / 4";
 
 
-  sizeText.textContent =
+      if(
+        loadedCount === 4
+      ){
 
-    naturalWidth +
-    " × " +
-    naturalHeight;
+        ready = true;
 
-
-  /*
-    將來源的每一格縮放成
-    100 × 100。
-
-    整張圖片因此變成：
-
-    900 × 500
-  */
-
-  sprite.style.width =
-    (COLS * CELL) + "px";
-
-  sprite.style.height =
-    (ROWS * CELL) + "px";
+        loadStatus.textContent =
+          "✓ 4 / 4";
 
 
-  spriteReady = true;
+        resetGame();
+
+      }
+
+    };
 
 
-  resetGame();
+    img.onerror =
+    function(){
 
-};
+      loadStatus.textContent =
+        "❌ " + direction + " 載入失敗";
 
-
-sprite.onerror = function(){
-
-  actionText.textContent =
-    "❌ 圖片載入失敗";
-
-};
+    };
 
 
-/* ======================================
-   FRAME
-====================================== */
+    img.src =
+      ASSETS[direction];
 
-function setFrame(row,frame){
 
-  if(!spriteReady){
-    return;
+    cache[direction] =
+      img;
+
   }
 
-
-  frame =
-    Math.max(
-      0,
-      Math.min(
-        COLS - 1,
-        frame
-      )
-    );
+);
 
 
-  row =
-    Math.max(
-      0,
-      Math.min(
-        ROWS - 1,
-        row
-      )
-    );
-
-
-  /*
-    CELL = 100
-
-    正常第1格：
-    0
-
-    正常第2格：
-    -100
-
-    Clean Frame：
-
-    再往左/上移SAFE，
-    讓窗口不顯示格子邊緣。
-  */
-
-  const x =
-    -(frame * CELL) -
-    SAFE;
-
-
-  const y =
-    -(row * CELL) -
-    SAFE;
-
-
-  sprite.style.left =
-    x + "px";
-
-
-  sprite.style.top =
-    y + "px";
-
-
-  frameText.textContent =
-    (frame + 1) +
-    " / 9";
-
-}
-
-
-/* ======================================
+/* =====================================
    PLAYER
-====================================== */
+===================================== */
 
 const player = {
 
@@ -547,47 +471,43 @@ const player = {
 
   y:0,
 
-  speed:65,
-
   direction:"down",
+
+  speed:65,
 
   frame:0,
 
   frameTimer:0,
 
-  frameSpeed:130
+  frameSpeed:180
 
 };
 
 
-/* ======================================
+/* =====================================
    PHASES
-====================================== */
+===================================== */
 
 const phases = [
 
   {
-    label:"↓ Down",
     direction:"down",
-    row:ROW.down
+    label:"↓ Down"
   },
 
   {
-    label:"← Left",
     direction:"left",
-    row:ROW.left
+    label:"← Left"
   },
 
   {
-    label:"→ Right",
     direction:"right",
-    row:ROW.right
+    label:"→ Right"
   },
 
   {
-    label:"↑ Up",
     direction:"up",
-    row:ROW.up
+    label:"↑ Up"
   }
 
 ];
@@ -598,13 +518,17 @@ let phase = 0;
 let phaseTimer = 0;
 
 
+/*
+  每個方向2.2秒。
+*/
+
 const PHASE_LENGTH =
-2000;
+2200;
 
 
-/* ======================================
-   STATE
-====================================== */
+/* =====================================
+   GAME STATE
+===================================== */
 
 let paused = false;
 
@@ -612,9 +536,88 @@ let lastTime =
 performance.now();
 
 
-/* ======================================
+/* =====================================
+   CHANGE DIRECTION IMAGE
+===================================== */
+
+function setDirection(
+  direction
+){
+
+  player.direction =
+    direction;
+
+
+  /*
+    關鍵：
+
+    換方向 = 換圖片。
+
+    完全沒有Row計算。
+  */
+
+  sprite.src =
+    ASSETS[direction];
+
+
+  player.frame =
+    0;
+
+
+  player.frameTimer =
+    0;
+
+
+  setFrame(0);
+
+}
+
+
+/* =====================================
+   SET FRAME
+===================================== */
+
+function setFrame(
+  frame
+){
+
+  frame =
+    Math.max(
+      0,
+      Math.min(
+        2,
+        frame
+      )
+    );
+
+
+  /*
+    一張圖：
+
+    300 × 100
+
+    每格：
+
+    100 × 100
+  */
+
+  sprite.style.left =
+
+    -(frame * 100) +
+    "px";
+
+
+  frameText.textContent =
+
+    (frame + 1) +
+    " / 3";
+
+}
+
+
+/* =====================================
    RESET
-====================================== */
+===================================== */
 
 function resetGame(){
 
@@ -624,18 +627,6 @@ function resetGame(){
 
   player.y =
     game.clientHeight / 2;
-
-
-  player.direction =
-    "down";
-
-
-  player.frame =
-    0;
-
-
-  player.frameTimer =
-    0;
 
 
   phase =
@@ -650,9 +641,8 @@ function resetGame(){
     phases[0].label;
 
 
-  setFrame(
-    phases[0].row,
-    0
+  setDirection(
+    phases[0].direction
   );
 
 
@@ -661,9 +651,9 @@ function resetGame(){
 }
 
 
-/* ======================================
+/* =====================================
    NEXT PHASE
-====================================== */
+===================================== */
 
 function nextPhase(){
 
@@ -680,7 +670,7 @@ function nextPhase(){
 
 
     /*
-      每跑完一輪回中央。
+      一輪結束回中央。
     */
 
     player.x =
@@ -693,29 +683,28 @@ function nextPhase(){
   }
 
 
-  player.direction =
-    phases[phase].direction;
-
-
-  player.frame =
-    0;
-
-
-  player.frameTimer =
-    0;
+  const next =
+    phases[phase];
 
 
   actionText.textContent =
-    phases[phase].label;
+    next.label;
+
+
+  setDirection(
+    next.direction
+  );
 
 }
 
 
-/* ======================================
+/* =====================================
    MOVEMENT
-====================================== */
+===================================== */
 
-function updateMovement(dt){
+function updateMovement(
+  dt
+){
 
   const move =
 
@@ -800,11 +789,13 @@ function updateMovement(dt){
 }
 
 
-/* ======================================
+/* =====================================
    ANIMATION
-====================================== */
+===================================== */
 
-function updateAnimation(dt){
+function updateAnimation(
+  dt
+){
 
   player.frameTimer +=
     dt;
@@ -815,11 +806,6 @@ function updateAnimation(dt){
     player.frameSpeed
   ){
 
-    /*
-      保留超出的時間，
-      動畫會比直接歸零更穩。
-    */
-
     player.frameTimer -=
       player.frameSpeed;
 
@@ -829,26 +815,21 @@ function updateAnimation(dt){
       (
         player.frame +
         1
-      ) %
-      COLS;
+      ) % 3;
+
+
+    setFrame(
+      player.frame
+    );
 
   }
-
-
-  setFrame(
-
-    phases[phase].row,
-
-    player.frame
-
-  );
 
 }
 
 
-/* ======================================
+/* =====================================
    DRAW
-====================================== */
+===================================== */
 
 function draw(){
 
@@ -864,11 +845,13 @@ function draw(){
 }
 
 
-/* ======================================
+/* =====================================
    UPDATE
-====================================== */
+===================================== */
 
-function update(dt){
+function update(
+  dt
+){
 
   phaseTimer +=
     dt;
@@ -888,18 +871,24 @@ function update(dt){
   }
 
 
-  updateMovement(dt);
+  updateMovement(
+    dt
+  );
 
-  updateAnimation(dt);
+
+  updateAnimation(
+    dt
+  );
+
 
   draw();
 
 }
 
 
-/* ======================================
+/* =====================================
    BUTTONS
-====================================== */
+===================================== */
 
 pauseButton.onclick =
 function(){
@@ -927,11 +916,13 @@ function(){
 };
 
 
-/* ======================================
+/* =====================================
    LOOP
-====================================== */
+===================================== */
 
-function loop(now){
+function loop(
+  now
+){
 
   const dt =
 
@@ -950,11 +941,13 @@ function loop(now){
 
 
   if(
-    spriteReady &&
+    ready &&
     !paused
   ){
 
-    update(dt);
+    update(
+      dt
+    );
 
   }
 
