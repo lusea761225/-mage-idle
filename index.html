@@ -2,32 +2,22 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
->
-
-<title>Mage Idle - P0.3A</title>
+<title>Mage Idle P0.3A-2</title>
 
 <style>
-
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body{
+html,body{
   margin:0;
-  padding:0;
   background:#0d1117;
-  color:#fff;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  color:white;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
 body{
@@ -35,259 +25,174 @@ body{
 }
 
 #app{
-  width:100%;
   max-width:760px;
   margin:auto;
 }
 
-h2{
-  margin:4px 0 6px;
-  font-size:20px;
+h1{
+  font-size:22px;
+  margin:5px 0;
 }
 
-#version{
-  font-size:12px;
+#sub{
   color:#8b949e;
+  font-size:13px;
   margin-bottom:10px;
 }
-
-/* ================================
-   STATUS
-================================ */
 
 #status{
   background:#161b22;
   border:1px solid #30363d;
   border-radius:10px;
-
   padding:10px 12px;
   margin-bottom:10px;
-
-  font-size:14px;
   line-height:1.7;
+  font-size:14px;
 }
 
-#directionText{
+#action{
   color:#58a6ff;
   font-weight:bold;
 }
 
-#frameText{
+#frame{
   color:#7ee787;
   font-weight:bold;
 }
 
-/* ================================
-   GAME MAP
-================================ */
+/* MAP */
 
 #game{
   position:relative;
-
   width:100%;
   height:520px;
-
   overflow:hidden;
 
-  border:2px solid #43633c;
-  border-radius:12px;
+  border:2px solid #42643b;
+  border-radius:14px;
 
   background:
-    radial-gradient(
-      circle at 20% 25%,
-      rgba(255,255,255,.08) 0 2px,
-      transparent 3px
-    ),
+    radial-gradient(circle at 20% 25%,
+      rgba(255,255,255,.07) 0 3px,
+      transparent 4px),
 
-    radial-gradient(
-      circle at 75% 65%,
-      rgba(0,0,0,.08) 0 3px,
-      transparent 4px
-    ),
+    radial-gradient(circle at 75% 70%,
+      rgba(0,0,0,.08) 0 4px,
+      transparent 5px),
 
     linear-gradient(
-      #679557,
-      #527d46
+      #699957,
+      #527c46
     );
 }
 
-/* ================================
-   PATH MARKERS
-================================ */
-
-.marker{
-  position:absolute;
-
-  width:8px;
-  height:8px;
-
-  background:
-    rgba(255,255,255,.20);
-
-  border-radius:50%;
-
-  transform:
-    translate(-50%,-50%);
-}
-
-/* ================================
-   MAGE
-================================ */
+/* PLAYER */
 
 #mage{
   position:absolute;
 
   width:110px;
-  height:130px;
+  height:120px;
 
-  transform:
-    translate(-50%,-82%);
-
-  pointer-events:none;
-
-  z-index:20;
-}
-
-/*
-  P0.3A：
-
-  不再使用 background-position。
-
-  角色就是一個正常 <img>。
-
-  JavaScript 只負責改變圖片顯示區域。
-*/
-
-#mageView{
-  position:absolute;
-
-  left:0;
-  bottom:8px;
-
-  width:110px;
-  height:110px;
-
-  overflow:hidden;
-
-  pointer-events:none;
-}
-
-#spriteSheet{
-  position:absolute;
-
-  max-width:none;
-
-  user-select:none;
+  transform:translate(-50%,-85%);
 
   pointer-events:none;
 
-  image-rendering:auto;
+  z-index:10;
 }
-
-/* ================================
-   SHADOW
-================================ */
 
 #shadow{
   position:absolute;
 
-  left:50%;
-  bottom:5px;
-
   width:48px;
-  height:14px;
+  height:13px;
 
-  transform:
-    translateX(-50%);
+  left:50%;
+  bottom:7px;
 
-  background:
-    rgba(0,0,0,.25);
+  transform:translateX(-50%);
 
   border-radius:50%;
 
-  filter:blur(1px);
-
-  z-index:-1;
+  background:rgba(0,0,0,.25);
 }
 
-/* ================================
-   NAME
-================================ */
+/*
+  這是唯一顯示角色的窗口。
+*/
 
-#mageName{
+#spriteWindow{
   position:absolute;
 
-  left:50%;
-  bottom:-8px;
+  width:100px;
+  height:100px;
 
-  transform:
-    translateX(-50%);
+  left:5px;
+  bottom:12px;
 
-  white-space:nowrap;
-
-  font-size:11px;
-
-  color:white;
-
-  text-shadow:
-    0 1px 3px #000;
+  overflow:hidden;
 }
 
-/* ================================
-   PANEL
-================================ */
+/*
+  Sprite Sheet 本體。
 
-#panel{
-  margin-top:10px;
+  JavaScript 會根據圖片真正尺寸
+  自動縮放成：
 
-  padding:10px 12px;
+  9格 × 5格
 
-  background:#161b22;
+  每格100px。
+*/
 
-  border:1px solid #30363d;
+#sprite{
+  position:absolute;
 
-  border-radius:10px;
+  max-width:none;
 
-  font-size:13px;
+  pointer-events:none;
 
-  line-height:1.7;
+  user-select:none;
 }
 
-.good{
-  color:#7ee787;
-}
-
-.warn{
-  color:#f2cc60;
-}
+/* CONTROLS */
 
 #controls{
   display:flex;
   gap:8px;
-
   margin-top:10px;
 }
 
 button{
   flex:1;
 
-  border:0;
-
-  border-radius:9px;
-
   padding:11px;
 
-  background:#30363d;
+  border:0;
+  border-radius:9px;
 
+  background:#30363d;
   color:white;
 
-  font-weight:bold;
-
   font-size:14px;
+  font-weight:bold;
 }
 
-button:active{
-  transform:scale(.98);
+#info{
+  margin-top:10px;
+
+  padding:10px 12px;
+
+  background:#161b22;
+
+  border:1px solid #30363d;
+  border-radius:10px;
+
+  font-size:13px;
+  line-height:1.7;
+}
+
+.good{
+  color:#7ee787;
 }
 
 </style>
@@ -297,28 +202,26 @@ button:active{
 
 <div id="app">
 
-<h2>
-🧙 Mage Idle — P0.3A
-</h2>
+<h1>🧙 Mage Idle — P0.3A-2</h1>
 
-<div id="version">
-天堂模板式動畫架構測試
+<div id="sub">
+天堂模板式角色動畫測試
 </div>
-
 
 <div id="status">
 
-目前動作：
-<span id="directionText">
-載入中
-</span>
+目前方向：
+<span id="action">載入中...</span>
 
 <br>
 
 動畫 Frame：
-<span id="frameText">
--
-</span>
+<span id="frame">-</span>
+
+<br>
+
+Sprite：
+<span id="size">等待圖片</span>
 
 </div>
 
@@ -329,18 +232,14 @@ button:active{
 
     <div id="shadow"></div>
 
-    <div id="mageView">
+    <div id="spriteWindow">
 
       <img
-        id="spriteSheet"
-        src="A06B05E6-A958-48CD-9920-792F573C0CB6.png"
+        id="sprite"
+        src="31C9D3E8-52BE-4F63-B558-198195F25DD7.png"
         alt=""
       >
 
-    </div>
-
-    <div id="mageName">
-      Mage
     </div>
 
   </div>
@@ -350,33 +249,34 @@ button:active{
 
 <div id="controls">
 
-<button id="pauseBtn">
+<button id="pause">
 暫停
 </button>
 
-<button id="restartBtn">
+<button id="restart">
 重新開始
 </button>
 
 </div>
 
 
-<div id="panel">
+<div id="info">
 
 <div class="good">
-✓ P0.3 新動畫播放器
+✓ 新版乾淨 Sprite Sheet
 </div>
 
 <div class="good">
-✓ 不使用舊版 background-position
+✓ 9 Columns × 5 Rows
 </div>
 
 <div class="good">
-✓ 自動測試四方向移動
+✓ 自動讀取圖片真正尺寸
 </div>
 
-<div class="warn">
-測試順序：↓ → ← → → → ↑
+<div>
+測試循環：
+↓ Down → ← Left → → Right → ↑ Up
 </div>
 
 <div>
@@ -390,25 +290,10 @@ button:active{
 
 <script>
 
-/* =========================================
-   P0.3A
-
-   Mage Animation Prototype
-
-   這一版只測：
-
-   DOWN
-   LEFT
-   RIGHT
-   UP
-
-   沒有戰鬥系統。
-========================================= */
-
-
-/* =========================================
-   DOM
-========================================= */
+/* =======================================
+   P0.3A-2
+   CLEAN SPRITE ANIMATION TEST
+======================================= */
 
 const game =
 document.getElementById("game");
@@ -416,139 +301,50 @@ document.getElementById("game");
 const mage =
 document.getElementById("mage");
 
-const mageView =
-document.getElementById("mageView");
-
 const sprite =
-document.getElementById("spriteSheet");
+document.getElementById("sprite");
 
-const directionText =
-document.getElementById("directionText");
+const actionText =
+document.getElementById("action");
 
 const frameText =
-document.getElementById("frameText");
+document.getElementById("frame");
 
-const pauseBtn =
-document.getElementById("pauseBtn");
+const sizeText =
+document.getElementById("size");
 
-const restartBtn =
-document.getElementById("restartBtn");
+const pauseButton =
+document.getElementById("pause");
+
+const restartButton =
+document.getElementById("restart");
 
 
-/* =========================================
-   IMPORTANT
+/* =======================================
+   SPRITE CONFIG
+======================================= */
 
-   新圖片本身包含：
+const COLS = 9;
 
-   左側標題欄
-   上方 Frame 編號
-   五排動畫
-
-   所以不能再假設：
-
-   圖片寬度 / 9
-   圖片高度 / 5
-
-   我們明確定義實際動畫區域。
-========================================= */
+const ROWS = 5;
 
 
 /*
-  這張生成圖片是：
-
-  1536 × 1024
-
-  左側 label 約 150px。
-
-  每排高度約 204.8px。
-
-  每排上方約有 30px 的編號列。
-
-  所以我們把動畫角色區域
-  明確取出。
+  每一格在遊戲裡固定顯示100×100。
 */
 
-
-const SHEET_W = 1536;
-const SHEET_H = 1024;
+const CELL = 100;
 
 
 /*
-  左側標題區寬度
+  Row 定義：
+
+  0 Idle
+  1 Down
+  2 Left
+  3 Right
+  4 Up
 */
-
-const CONTENT_X = 150;
-
-
-/*
-  右側動畫區總寬
-*/
-
-const CONTENT_W =
-SHEET_W - CONTENT_X;
-
-
-/*
-  9 格
-*/
-
-const FRAME_W =
-CONTENT_W / 9;
-
-
-/*
-  五排
-*/
-
-const ROW_H =
-SHEET_H / 5;
-
-
-/*
-  每排頂部黑色數字列高度
-*/
-
-const HEADER_H = 31;
-
-
-/*
-  真正角色畫面高度
-*/
-
-const FRAME_H =
-ROW_H - HEADER_H;
-
-
-/* =========================================
-   DISPLAY SCALE
-========================================= */
-
-/*
-  原始每格大約：
-
-  154 × 174
-
-  遊戲裡縮成約 100px。
-*/
-
-const DISPLAY_W = 100;
-
-const SCALE =
-DISPLAY_W / FRAME_W;
-
-const DISPLAY_H =
-FRAME_H * SCALE;
-
-
-/* =========================================
-   ROW
-
-   0 Idle
-   1 Down
-   2 Left
-   3 Right
-   4 Up
-========================================= */
 
 const ROW = {
 
@@ -565,163 +361,74 @@ const ROW = {
 };
 
 
-/* =========================================
-   PLAYER
-========================================= */
-
-const player = {
-
-  x:0,
-
-  y:0,
-
-  speed:75,
-
-  direction:"down",
-
-  frame:0,
-
-  frameTimer:0,
-
-  frameInterval:120,
-
-  moving:true
-
-};
+let spriteReady = false;
 
 
-/* =========================================
-   TEST PATH
-
-   自動走一個方形。
-
-   Down
-   Left
-   Right
-   Up
-========================================= */
-
-let phase = 0;
-
-let phaseStart = 0;
-
-
-/*
-  每個方向走 2.3 秒
-*/
-
-const PHASE_TIME = 2300;
-
-
-const phases = [
-
-  {
-    name:"↓ Down",
-    direction:"down"
-  },
-
-  {
-    name:"← Left",
-    direction:"left"
-  },
-
-  {
-    name:"→ Right",
-    direction:"right"
-  },
-
-  {
-    name:"↑ Up",
-    direction:"up"
-  }
-
-];
-
-
-/* =========================================
-   GAME STATE
-========================================= */
-
-let paused = false;
-
-let ready = false;
-
-let lastTime =
-performance.now();
-
-
-/* =========================================
-   SPRITE LOADED
-========================================= */
+/* =======================================
+   IMAGE LOAD
+======================================= */
 
 sprite.onload = function(){
 
+  const realWidth =
+    sprite.naturalWidth;
+
+  const realHeight =
+    sprite.naturalHeight;
+
+
+  sizeText.textContent =
+    realWidth +
+    " × " +
+    realHeight;
+
+
   /*
-    如果 GitHub 圖片尺寸跟預期不同，
-    仍然先印出真正尺寸。
-  */
+    關鍵：
 
-  console.log(
-    "Sprite:",
-    sprite.naturalWidth,
-    sprite.naturalHeight
-  );
+    不管圖片原本是多少px，
+    整張圖統一縮成：
 
+    900 × 500
 
-  /*
-    整張圖片縮放。
+    所以每一格一定就是：
+
+    100 × 100
   */
 
   sprite.style.width =
-    (SHEET_W * SCALE) + "px";
-
+    (CELL * COLS) + "px";
 
   sprite.style.height =
-    (SHEET_H * SCALE) + "px";
+    (CELL * ROWS) + "px";
 
 
-  /*
-    viewport
-  */
-
-  mageView.style.width =
-    DISPLAY_W + "px";
+  spriteReady = true;
 
 
-  mageView.style.height =
-    DISPLAY_H + "px";
-
-
-  mageView.style.left =
-    ((110 - DISPLAY_W) / 2) + "px";
-
-
-  ready = true;
-
-
-  resetTest();
+  resetGame();
 
 };
 
 
 sprite.onerror = function(){
 
-  directionText.textContent =
+  actionText.textContent =
     "❌ 圖片載入失敗";
 
 };
 
 
-/* =========================================
+/* =======================================
    SET FRAME
-========================================= */
+======================================= */
 
 function setFrame(
   row,
   frame
 ){
 
-  if(!ready){
+  if(!spriteReady){
     return;
   }
 
@@ -736,278 +443,124 @@ function setFrame(
     );
 
 
-  /*
-    原始圖片座標。
-  */
-
-  const sourceX =
-
-    CONTENT_X +
-
-    (
-      frame *
-      FRAME_W
+  row =
+    Math.max(
+      0,
+      Math.min(
+        4,
+        row
+      )
     );
 
 
-  const sourceY =
-
-    (
-      row *
-      ROW_H
-    ) +
-
-    HEADER_H;
-
-
   /*
-    因為整張圖片已經 SCALE，
-    所以座標也一起 SCALE。
+    因為每格固定100px，
+    所以完全不需要猜原圖尺寸。
   */
 
   sprite.style.left =
-
-    -(sourceX * SCALE) +
+    -(frame * CELL) +
     "px";
 
 
   sprite.style.top =
-
-    -(sourceY * SCALE) +
+    -(row * CELL) +
     "px";
 
 
   frameText.textContent =
-
     (frame + 1) +
     " / 9";
 
 }
 
 
-/* =========================================
-   DIRECTION ROW
-========================================= */
+/* =======================================
+   PLAYER
+======================================= */
 
-function getRow(
-  direction
-){
+const player = {
 
-  if(direction === "left"){
-    return ROW.left;
+  x:0,
+
+  y:0,
+
+  speed:65,
+
+  direction:"down",
+
+  frame:0,
+
+  frameTimer:0,
+
+  frameSpeed:130
+
+};
+
+
+/* =======================================
+   TEST SEQUENCE
+======================================= */
+
+const phases = [
+
+  {
+    label:"↓ Down",
+    direction:"down",
+    row:ROW.down
+  },
+
+  {
+    label:"← Left",
+    direction:"left",
+    row:ROW.left
+  },
+
+  {
+    label:"→ Right",
+    direction:"right",
+    row:ROW.right
+  },
+
+  {
+    label:"↑ Up",
+    direction:"up",
+    row:ROW.up
   }
 
-  if(direction === "right"){
-    return ROW.right;
-  }
+];
 
-  if(direction === "up"){
-    return ROW.up;
-  }
 
-  return ROW.down;
+let phase = 0;
 
-}
+let phaseTimer = 0;
 
 
-/* =========================================
-   ANIMATION
-========================================= */
+/*
+  每個方向2秒。
+*/
 
-function updateAnimation(
-  dt
-){
+const PHASE_LENGTH = 2000;
 
-  player.frameTimer += dt;
 
+/* =======================================
+   STATE
+======================================= */
 
-  if(
-    player.frameTimer >=
-    player.frameInterval
-  ){
+let paused = false;
 
-    player.frameTimer = 0;
+let lastTime =
+performance.now();
 
-    player.frame =
 
-      (
-        player.frame +
-        1
-      ) % 9;
-
-  }
-
-
-  setFrame(
-
-    getRow(
-      player.direction
-    ),
-
-    player.frame
-
-  );
-
-}
-
-
-/* =========================================
-   MOVEMENT
-========================================= */
-
-function updateMovement(
-  dt
-){
-
-  const move =
-
-    player.speed *
-    dt /
-    1000;
-
-
-  switch(
-    player.direction
-  ){
-
-    case "down":
-
-      player.y += move;
-
-      break;
-
-
-    case "up":
-
-      player.y -= move;
-
-      break;
-
-
-    case "left":
-
-      player.x -= move;
-
-      break;
-
-
-    case "right":
-
-      player.x += move;
-
-      break;
-
-  }
-
-
-  /*
-    安全邊界
-  */
-
-  player.x =
-    Math.max(
-      65,
-      Math.min(
-        game.clientWidth - 65,
-        player.x
-      )
-    );
-
-
-  player.y =
-    Math.max(
-      110,
-      Math.min(
-        game.clientHeight - 45,
-        player.y
-      )
-    );
-
-}
-
-
-/* =========================================
-   TEST PHASE
-========================================= */
-
-function updatePhase(
-  now
-){
-
-  if(
-    now - phaseStart <
-    PHASE_TIME
-  ){
-
-    return;
-  }
-
-
-  phase++;
-
-  if(
-    phase >= phases.length
-  ){
-
-    phase = 0;
-
-    /*
-      每輪重新回中央，
-      避免一直撞地圖邊界。
-    */
-
-    player.x =
-      game.clientWidth / 2;
-
-    player.y =
-      game.clientHeight / 2;
-
-  }
-
-
-  phaseStart = now;
-
-
-  player.direction =
-    phases[phase].direction;
-
-
-  player.frame = 0;
-
-  player.frameTimer = 0;
-
-
-  directionText.textContent =
-    phases[phase].name;
-
-}
-
-
-/* =========================================
-   DRAW PLAYER
-========================================= */
-
-function drawPlayer(){
-
-  mage.style.left =
-    player.x + "px";
-
-
-  mage.style.top =
-    player.y + "px";
-
-}
-
-
-/* =========================================
+/* =======================================
    RESET
-========================================= */
+======================================= */
 
-function resetTest(){
+function resetGame(){
 
   player.x =
     game.clientWidth / 2;
-
 
   player.y =
     game.clientHeight / 2;
@@ -1024,55 +577,301 @@ function resetTest(){
 
   phase = 0;
 
-
-  phaseStart =
-    performance.now();
+  phaseTimer = 0;
 
 
-  directionText.textContent =
-    phases[0].name;
+  actionText.textContent =
+    phases[0].label;
 
 
   setFrame(
-    ROW.down,
+    phases[0].row,
     0
   );
 
 
-  drawPlayer();
+  draw();
 
 }
 
 
-/* =========================================
-   BUTTONS
-========================================= */
+/* =======================================
+   CHANGE DIRECTION
+======================================= */
 
-pauseBtn.onclick = function(){
+function nextPhase(){
+
+  phase++;
+
+  if(
+    phase >=
+    phases.length
+  ){
+
+    phase = 0;
+
+
+    /*
+      每完成一輪，
+      回到地圖中央。
+    */
+
+    player.x =
+      game.clientWidth / 2;
+
+    player.y =
+      game.clientHeight / 2;
+
+  }
+
+
+  player.direction =
+    phases[phase].direction;
+
+
+  player.frame = 0;
+
+  player.frameTimer = 0;
+
+
+  actionText.textContent =
+    phases[phase].label;
+
+}
+
+
+/* =======================================
+   MOVEMENT
+======================================= */
+
+function updateMovement(
+  dt
+){
+
+  const distance =
+
+    player.speed *
+    dt /
+    1000;
+
+
+  if(
+    player.direction ===
+    "down"
+  ){
+
+    player.y +=
+      distance;
+
+  }
+
+
+  else if(
+    player.direction ===
+    "up"
+  ){
+
+    player.y -=
+      distance;
+
+  }
+
+
+  else if(
+    player.direction ===
+    "left"
+  ){
+
+    player.x -=
+      distance;
+
+  }
+
+
+  else if(
+    player.direction ===
+    "right"
+  ){
+
+    player.x +=
+      distance;
+
+  }
+
+
+  /*
+    防止人物離開畫面。
+  */
+
+  player.x =
+
+    Math.max(
+
+      60,
+
+      Math.min(
+
+        game.clientWidth -
+        60,
+
+        player.x
+
+      )
+
+    );
+
+
+  player.y =
+
+    Math.max(
+
+      100,
+
+      Math.min(
+
+        game.clientHeight -
+        40,
+
+        player.y
+
+      )
+
+    );
+
+}
+
+
+/* =======================================
+   ANIMATION
+======================================= */
+
+function updateAnimation(
+  dt
+){
+
+  player.frameTimer +=
+    dt;
+
+
+  if(
+    player.frameTimer >=
+    player.frameSpeed
+  ){
+
+    player.frameTimer = 0;
+
+
+    player.frame =
+
+      (
+        player.frame +
+        1
+      ) % 9;
+
+  }
+
+
+  setFrame(
+
+    phases[phase].row,
+
+    player.frame
+
+  );
+
+}
+
+
+/* =======================================
+   DRAW
+======================================= */
+
+function draw(){
+
+  mage.style.left =
+    player.x +
+    "px";
+
+
+  mage.style.top =
+    player.y +
+    "px";
+
+}
+
+
+/* =======================================
+   UPDATE
+======================================= */
+
+function update(
+  dt
+){
+
+  phaseTimer +=
+    dt;
+
+
+  if(
+    phaseTimer >=
+    PHASE_LENGTH
+  ){
+
+    phaseTimer = 0;
+
+    nextPhase();
+
+  }
+
+
+  updateMovement(
+    dt
+  );
+
+
+  updateAnimation(
+    dt
+  );
+
+
+  draw();
+
+}
+
+
+/* =======================================
+   BUTTONS
+======================================= */
+
+pauseButton.onclick =
+function(){
 
   paused =
     !paused;
 
 
-  pauseBtn.textContent =
+  pauseButton.textContent =
 
     paused
-    ? "繼續"
-    : "暫停";
+    ?
+    "繼續"
+    :
+    "暫停";
 
 };
 
 
-restartBtn.onclick = function(){
+restartButton.onclick =
+function(){
 
-  resetTest();
+  resetGame();
 
 };
 
 
-/* =========================================
+/* =======================================
    LOOP
-========================================= */
+======================================= */
 
 function loop(
   now
@@ -1081,35 +880,27 @@ function loop(
   const dt =
 
     Math.min(
+
       50,
-      now - lastTime
+
+      now -
+      lastTime
+
     );
 
 
-  lastTime = now;
+  lastTime =
+    now;
 
 
   if(
-    ready &&
+    spriteReady &&
     !paused
   ){
 
-    updatePhase(
-      now
-    );
-
-
-    updateMovement(
+    update(
       dt
     );
-
-
-    updateAnimation(
-      dt
-    );
-
-
-    drawPlayer();
 
   }
 
